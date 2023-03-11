@@ -27,10 +27,10 @@ func main() {
 
 			var data interface{}
 			if i%2 == 0 {
-				time.Sleep(time.Duration(1))
+				time.Sleep(2 * time.Second)
 				data = Data3{Value: rand.Intn(100)}
 			} else {
-				time.Sleep(time.Duration(1))
+				time.Sleep(2 * time.Second)
 				data = Data4{Value: fmt.Sprintf("Data %d", rand.Intn(100))}
 			}
 

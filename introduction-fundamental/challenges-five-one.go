@@ -20,15 +20,15 @@ func main() {
 
 	go func() {
 		for i := 0; i < 4; i++ {
-			time.Sleep(time.Duration(1))
+			time.Sleep(2 * time.Second)
 			ch1 <- Data1{Value: rand.Intn(100)}
 		}
 	}()
 
 	go func() {
 		for i := 0; i < 4; i++ {
-			time.Sleep(time.Duration(1))
-			ch2 <- Data2{Value: fmt.Sprintf("Angka %d", rand.Intn(100))}
+			time.Sleep(2 * time.Second)
+			ch2 <- Data2{Value: fmt.Sprintf("Data %d", rand.Intn(100))}
 		}
 	}()
 
