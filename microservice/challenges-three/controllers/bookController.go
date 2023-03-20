@@ -54,7 +54,7 @@ func GetAllBook(db *sql.DB) gin.HandlerFunc {
 
 		if (len(books) == 0 || err != nil) {
 			// OK but no content
-			c.AbortWithStatusJSON(204, gin.H{
+			c.AbortWithStatusJSON(404, gin.H{
 				"status": "Data Not Found",
 				"message": fmt.Sprintln("There is no book"),
 			})
@@ -76,7 +76,7 @@ func GetBook(db *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			// OK but no content
-			c.AbortWithStatusJSON(204, gin.H{
+			c.AbortWithStatusJSON(404, gin.H{
 				"status": "Data Not Found",
 				"message": fmt.Sprintf("book with id %v not found", bid),
 			})
@@ -105,7 +105,7 @@ func UpdateBook(db *sql.DB) gin.HandlerFunc {
 		fmt.Println(err)
 		if err != nil {
 			// OK but no content
-			c.AbortWithStatusJSON(204, gin.H{
+			c.AbortWithStatusJSON(404, gin.H{
 				"status": "Data Not Found",
 				"message": fmt.Sprintf("book with id %v not found", bid),
 			})
