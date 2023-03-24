@@ -25,7 +25,8 @@ func UserRegister(c *gin.Context)  {
 		c.ShouldBind(&User)
 	}
 	
-	err := db.Debug().Create(&User).Error
+	// err := db.Debug().Create(&User).Error
+	err := db.Create(&User).Error
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -57,7 +58,8 @@ func UserLogin(c *gin.Context)  {
 	
 	Password = User.Password
 
-	err := db.Debug().Where("email = ?", User.Email).Take(&User).Error
+	// err := db.Debug().Where("email = ?", User.Email).Take(&User).Error
+	err := db.Where("email = ?", User.Email).Take(&User).Error
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{

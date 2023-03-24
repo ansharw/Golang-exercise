@@ -12,26 +12,43 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// Admin
+// GET, GET ALL, UPDATE, DELETE, POST
 func GetAllProduct(c *gin.Context) {
 	db := database.GetDB()
 	userData := c.MustGet("userData").(jwt.MapClaims)
 
 	product := models.Product{}
+	products := []models.Product{}
 	userID := uint(userData["id"].(float64))
 
 	product.UserID = userID
 
-	result := db.Debug().Where("user_id = ?", userID).Find(&product)
+	if userID == 1 {
+		result := db.Order("id DESC").Find(&products)
+		if result.RowsAffected == 0 {
+			c.AbortWithStatusJSON(404, gin.H{
+				"error":   "Data Not Found",
+				"message": fmt.Sprintln("There is no product"),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, products)
+	}
+
+	// result := db.Debug().Where("user_id = ?", userID).Find(&product)
+	result := db.Order("id DESC").Where("user_id = ?", userID).Find(&products)
 
 	if result.RowsAffected == 0 {
 		c.AbortWithStatusJSON(404, gin.H{
 			"error":   "Data Not Found",
-			"message": fmt.Sprintln("There is no book"),
+			"message": fmt.Sprintln("There is no product"),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, product)
+	c.JSON(http.StatusOK, products)
 }
 
 func GetProduct(c *gin.Context) {
@@ -42,12 +59,24 @@ func GetProduct(c *gin.Context) {
 	productId, _ := strconv.Atoi(c.Param("productId"))
 	userID := uint(userData["id"].(float64))
 
-	err_ := db.Debug().Where("id = ? AND user_id = ?", productId, userID).First(&product).Error
+	if userID == 1 {
+		err := db.Where("id = ?", productId).First(&product).Error
+		if err != nil || productId == 0 {
+			c.AbortWithStatusJSON(404, gin.H{
+				"error":   "Data Not Found",
+				"message": fmt.Sprintf("product with id: %d not found\n", productId),
+			})
+			return
+		}
+	}
 
-	if err_ != nil || productId == 0 {
+	// err := db.Debug().Where("id = ? AND user_id = ?", productId, userID).First(&product).Error
+	err := db.Where("id = ? AND user_id = ?", productId, userID).First(&product).Error
+
+	if err != nil || productId == 0 {
 		c.AbortWithStatusJSON(404, gin.H{
 			"error":   "Data Not Found",
-			"message": fmt.Sprintf("Book with id: %d not found\n", productId),
+			"message": fmt.Sprintf("product with id: %d not found\n", productId),
 		})
 		return
 	}
@@ -74,7 +103,8 @@ func CreateProduct(c *gin.Context) {
 
 	product.UserID = userID
 
-	err := db.Debug().Create(&product).Error
+	// err := db.Debug().Create(&product).Error
+	err := db.Create(&product).Error
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -87,14 +117,25 @@ func CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, product)
 }
 
+// only admin has access
 func UpdateProduct(c *gin.Context) {
 	db := database.GetDB()
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	contentType := helpers.GetContentType(c)
-	product := models.Product{}
 
+	product := models.Product{}
 	productId, _ := strconv.Atoi(c.Param("productId"))
 	userID := uint(userData["id"].(float64))
+
+	// untuk user selain admin di tolak
+	// ONLY ADMIN HAS ACCESS
+	if userID != 1 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error":   "Access denied",
+			"message": "You hasn't access to use this feature",
+		})
+		return
+	}
 
 	if contentType == appJson {
 		c.ShouldBindJSON(&product)
@@ -117,6 +158,7 @@ func UpdateProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
+// only admin has access
 func DeleteProduct(c *gin.Context) {
 	db := database.GetDB()
 	userData := c.MustGet("userData").(jwt.MapClaims)
@@ -126,17 +168,27 @@ func DeleteProduct(c *gin.Context) {
 	productId, _ := strconv.Atoi(c.Param("productId"))
 	userID := uint(userData["id"].(float64))
 
+	// untuk user selain admin di tolak
+	// ONLY ADMIN HAS ACCESS
+	if userID != 1 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error":   "Access denied",
+			"message": "You hasn't access to use this feature",
+		})
+		return
+	}
+
 	if contentType == appJson {
 		c.ShouldBindJSON(&product)
 	} else {
 		c.ShouldBind(&product)
 	}
 
-	err_ := db.Model(&product).Where("id = ? AND user_id = ?", productId, userID).First(&product).Error
+	err_ := db.Model(&product).Where("id = ?", productId).First(&product).Error
 	if err_ != nil || productId == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Data not found",
-			"message": "Product tidak ada di database kami",
+			"message": "Product doesn't exist",
 		})
 		return
 	}
@@ -153,5 +205,7 @@ func DeleteProduct(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, product)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Product deleted successfully",
+	})
 }
