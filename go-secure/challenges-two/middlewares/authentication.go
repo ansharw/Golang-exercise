@@ -9,8 +9,8 @@ import (
 
 func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		VerifyToken, err := helpers.VerifyToken(c)
-		_ = VerifyToken
+		verifyToken, err := helpers.VerifyToken(c)
+		_ = verifyToken
 
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -19,7 +19,7 @@ func Authentication() gin.HandlerFunc {
 			})
 			return
 		}
-		c.Set("userData", VerifyToken)
+		c.Set("userData", verifyToken)
 		c.Next()
 	}
 }

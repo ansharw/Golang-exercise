@@ -13,37 +13,57 @@ var (
 	appJson = "application/json"
 )
 
-func UserRegister(c *gin.Context)  {
+func UserRegister(c *gin.Context) {
 	db := database.GetDB()
 	contentType := helpers.GetContentType(c)
 	_, _ = db, contentType
 	User := models.User{}
 
 	if contentType == appJson {
-		c.ShouldBindJSON(&User)
+		if err := c.ShouldBindJSON(&User); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request",
+				"message": err.Error(),
+			})
+			return
+		}
 	} else {
-		c.ShouldBind(&User)
+		if err := c.ShouldBind(&User); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request",
+				"message": err.Error(),
+			})
+			return
+		}
 	}
-	
-	// err := db.Debug().Create(&User).Error
-	err := db.Create(&User).Error
 
-	if err != nil {
+	// if email already exist
+	var existingUser models.User
+	if err := db.Where("email = ?", User.Email).First(&existingUser).Error; err == nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   "Email Already Exists",
+			"message": "The email address you entered already exists",
+		})
+		return
+	}
+
+	// err := db.Debug().Create(&User).Error
+	if err := db.Create(&User).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Bad Request",
+			"error":   "Bad Request",
 			"message": err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"id": User.ID,
-		"email": User.Email,
+		"id":        User.ID,
+		"email":     User.Email,
 		"full_name": User.Fullname,
 	})
 }
 
-func UserLogin(c *gin.Context)  {
+func UserLogin(c *gin.Context) {
 	db := database.GetDB()
 	contentType := helpers.GetContentType(c)
 	_, _ = db, contentType
@@ -51,11 +71,23 @@ func UserLogin(c *gin.Context)  {
 	Password := ""
 
 	if contentType == appJson {
-		c.ShouldBindJSON(&User)
+		if err := c.ShouldBindJSON(&User); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request",
+				"message": err.Error(),
+			})
+			return
+		}
 	} else {
-		c.ShouldBind(&User)
+		if err := c.ShouldBind(&User); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request",
+				"message": err.Error(),
+			})
+			return
+		}
 	}
-	
+
 	Password = User.Password
 
 	// err := db.Debug().Where("email = ?", User.Email).Take(&User).Error
@@ -63,7 +95,7 @@ func UserLogin(c *gin.Context)  {
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Unauthorized",
+			"error":   "Unauthorized",
 			"message": "invalid email/password",
 		})
 		return
@@ -73,7 +105,7 @@ func UserLogin(c *gin.Context)  {
 
 	if !comparePass {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Unauthorized",
+			"error":   "Unauthorized",
 			"message": "invalid email/password",
 		})
 		return
