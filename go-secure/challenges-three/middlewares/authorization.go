@@ -12,7 +12,7 @@ import (
 
 func ProductAuthorizations() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		db := database.GetDB()
+		db := database.GetConnection()
 		userData := c.MustGet("userData").(jwt.MapClaims)
 		userID := uint(userData["id"].(float64))
 		product := models.Product{}

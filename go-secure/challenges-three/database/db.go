@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/stretchr/testify/mock"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -20,24 +19,10 @@ var (
 	err      error
 )
 
-// func GetConnection() *gorm.DB {
-// 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-
-// 	db, err := gorm.Open(postgres.Open(psqlInfo), &gorm.Config{})
-// 	if err != nil {
-// 		log.Fatal("Error to connection database", err)
-// 	}
-
-// 	fmt.Println("Successfully connected to database")
-
-// 	db.Debug().AutoMigrate(models.User{}, models.Product{})
-// 	return db
-// }
-
-func StartDB() {
+func GetConnection() *gorm.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
-	db, err = gorm.Open(postgres.Open(psqlInfo), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(psqlInfo), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Error to connection database", err)
 	}
@@ -45,12 +30,22 @@ func StartDB() {
 	fmt.Println("Successfully connected to database")
 
 	db.Debug().AutoMigrate(models.User{}, models.Product{})
-}
-
-func GetDB() *gorm.DB {
 	return db
 }
 
-func NewMockDB() *mock.Mock {
-	return &mock.Mock{}
-}
+// func StartDB() {
+// 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+
+// 	db, err = gorm.Open(postgres.Open(psqlInfo), &gorm.Config{})
+// 	if err != nil {
+// 		log.Fatal("Error to connection database", err)
+// 	}
+
+// 	fmt.Println("Successfully connected to database")
+
+// 	db.Debug().AutoMigrate(models.User{}, models.Product{})
+// }
+
+// func GetDB() *gorm.DB {
+// 	return db
+// }

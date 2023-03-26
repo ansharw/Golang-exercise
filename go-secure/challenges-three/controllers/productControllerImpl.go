@@ -4,6 +4,7 @@ import (
 	"challenges-three/database"
 	"challenges-three/helpers"
 	"challenges-three/models"
+	"challenges-three/services"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -12,42 +13,50 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type productHandler struct {
+	productService services.ProductService
+}
+
+func NewProductHandler(productService services.ProductService) *productHandler {
+	return &productHandler{
+		productService: productService,
+	}
+}
+
 // Admin
 // GET, GET ALL, UPDATE, DELETE, POST
 // User
 // GET, GET ALL, POST
-func GetAllProduct(c *gin.Context) {
-	db := database.GetDB()
+func (handler *productHandler) GetAllProducts(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
-
-	products := []models.Product{}
 	userID := uint(userData["id"].(float64))
 
 	if userID == 1 {
-		if result := db.Order("id DESC").Find(&products); result.RowsAffected == 0 {
+		res, err := handler.productService.FindAll(c)
+		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   "Internal Server Error",
-				"message": fmt.Sprintf("Error retrieving products: %s", result.Error.Error()),
+				"message": fmt.Sprintf("Error retrieving products: %s", err.Error()),
 			})
 			return
 		}
-
-		c.JSON(http.StatusOK, products)
+		c.JSON(http.StatusOK, res)
 	} else {
-		// result := db.Debug().Where("user_id = ?", userID).Find(&product)
-		if result := db.Where("user_id = ?", userID).Order("id DESC").Find(&products); result.RowsAffected == 0 {
+		res, err := handler.productService.FindAllByUserId(c, userID)
+		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   "Internal Server Error",
-				"message": fmt.Sprintf("Error retrieving products: %s", result.Error.Error()),
+				"message": fmt.Sprintf("Error retrieving products: %s", err.Error()),
 			})
 			return
 		}
-		c.JSON(http.StatusOK, products)
+		c.JSON(http.StatusOK, res)
 	}
 }
 
+
 func GetProduct(c *gin.Context) {
-	db := database.GetDB()
+	db := database.GetConnection()
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	product := models.Product{}
 
@@ -90,7 +99,7 @@ func GetProduct(c *gin.Context) {
 }
 
 func CreateProduct(c *gin.Context) {
-	db := database.GetDB()
+	db := database.GetConnection()
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	contentType := helpers.GetContentType(c)
 
@@ -132,7 +141,7 @@ func CreateProduct(c *gin.Context) {
 
 // only admin to access this feature
 func UpdateProduct(c *gin.Context) {
-	db := database.GetDB()
+	db := database.GetConnection()
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	contentType := helpers.GetContentType(c)
 
@@ -191,7 +200,7 @@ func UpdateProduct(c *gin.Context) {
 
 // only admin to access this feature
 func DeleteProduct(c *gin.Context) {
-	db := database.GetDB()
+	db := database.GetConnection()
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	product := models.Product{}
 

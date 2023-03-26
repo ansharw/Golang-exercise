@@ -14,7 +14,7 @@ var (
 )
 
 func UserRegister(c *gin.Context) {
-	db := database.GetDB()
+	db := database.GetConnection()
 	contentType := helpers.GetContentType(c)
 	_, _ = db, contentType
 	User := models.User{}
@@ -64,7 +64,7 @@ func UserRegister(c *gin.Context) {
 }
 
 func UserLogin(c *gin.Context) {
-	db := database.GetDB()
+	db := database.GetConnection()
 	contentType := helpers.GetContentType(c)
 	_, _ = db, contentType
 	User := models.User{}
