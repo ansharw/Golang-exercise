@@ -32,13 +32,13 @@ func (rpt *ProductRepositoryMock) FindByUserId(ctx context.Context, tx *gorm.DB,
 	return args.Get(0).(models.Product), args.Error(1)
 }
 
-func (rpt *ProductRepositoryMock) Create(ctx context.Context, tx *gorm.DB, userID uint) (models.Product, error) {
-	args := rpt.Called(ctx, tx, userID)
+func (rpt *ProductRepositoryMock) Create(ctx context.Context, tx *gorm.DB, product models.Product, userID uint) (models.Product, error) {
+	args := rpt.Called(ctx, tx, product, userID)
 	return args.Get(0).(models.Product), args.Error(1)
 }
 
-func (rpt *ProductRepositoryMock) Update(ctx context.Context, tx *gorm.DB, id uint) (models.Product, error) {
-	args := rpt.Called(ctx, tx, id)
+func (rpt *ProductRepositoryMock) Update(ctx context.Context, tx *gorm.DB, product models.Product, id uint) (models.Product, error) {
+	args := rpt.Called(ctx, tx, product, id)
 	return args.Get(0).(models.Product), args.Error(1)
 }
 

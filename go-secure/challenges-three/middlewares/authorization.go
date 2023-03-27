@@ -16,7 +16,7 @@ func ProductAuthorizations() gin.HandlerFunc {
 		userData := c.MustGet("userData").(jwt.MapClaims)
 		userID := uint(userData["id"].(float64))
 		product := models.Product{}
-		
+
 		if userID == 1 {
 			result := db.Order("id desc").First(&product)
 			if result.RowsAffected == 0 {

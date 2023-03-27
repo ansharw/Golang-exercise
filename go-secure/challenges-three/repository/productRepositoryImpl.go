@@ -53,8 +53,7 @@ func (repo *productRepository) FindByUserId(ctx context.Context, tx *gorm.DB, us
 	return product, nil
 }
 
-func (repo *productRepository) Create(ctx context.Context, tx *gorm.DB, userID uint) (models.Product, error) {
-	product := models.Product{}
+func (repo *productRepository) Create(ctx context.Context, tx *gorm.DB, product models.Product, userID uint) (models.Product, error) {
 	product.UserID = userID
 	if err := tx.WithContext(ctx).Create(&product).Error; err != nil {
 		log.Println("Error creating product:", err)
@@ -63,12 +62,13 @@ func (repo *productRepository) Create(ctx context.Context, tx *gorm.DB, userID u
 	return product, nil
 }
 
-func (repo *productRepository) Update(ctx context.Context, tx *gorm.DB, id uint) (models.Product, error) {
-	product := models.Product{}
-	if err := tx.WithContext(ctx).Model(&product).Where("id = ?", id).Updates(models.Product{Title: product.Title, Description: product.Description}).Error; err != nil {
+func (repo *productRepository) Update(ctx context.Context, tx *gorm.DB, product models.Product, id uint) (models.Product, error) {
+	if err := tx.WithContext(ctx).Model(&product).Where("id = ?", id).Updates(models.Product{GormModel: models.GormModel{ID: id}, Title: product.Title, Description: product.Description}).Error; err != nil {
 		log.Println("Error updating product:", err)
 		return product, err
 	}
+	// to return result after update
+	tx.WithContext(ctx).Where("id = ?", id).First(&product)
 	return product, nil
 }
 

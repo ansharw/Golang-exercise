@@ -73,11 +73,11 @@ func (service *productService) FindByUserId(ctx context.Context, userID uint, id
 	}
 }
 
-func (service *productService) Create(ctx context.Context, userID uint) (models.Product, error) {
+func (service *productService) Create(ctx context.Context, product models.Product, userID uint) (models.Product, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if product, err := service.repoProduct.Create(ctx, tx, userID); err != nil {
+	if product, err := service.repoProduct.Create(ctx, tx, product, userID); err != nil {
 		log.Println("Failed to create product")
 		return product, err
 	} else {
@@ -85,11 +85,11 @@ func (service *productService) Create(ctx context.Context, userID uint) (models.
 	}
 }
 
-func (service *productService) Update(ctx context.Context, id uint) (models.Product, error) {
+func (service *productService) Update(ctx context.Context, product models.Product, id uint) (models.Product, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if product, err := service.repoProduct.Update(ctx, tx, id); err != nil {
+	if product, err := service.repoProduct.Update(ctx, tx, product, id); err != nil {
 		log.Println("Failed to update product")
 		return product, err
 	} else {

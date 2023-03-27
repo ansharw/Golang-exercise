@@ -28,7 +28,7 @@ func NewProductHandler(productService services.ProductService) *productHandler {
 // GET, GET ALL, POST
 func (handler *productHandler) GetAllProducts(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
-	userID := userData["id"].(uint)
+	userID := uint(userData["id"].(float64))
 
 	if userID == 1 {
 		res, err := handler.productService.FindAll(c)
@@ -56,7 +56,7 @@ func (handler *productHandler) GetAllProducts(c *gin.Context) {
 
 func (handler *productHandler) GetProduct(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
-	userID := userData["id"].(uint)
+	userID := uint(userData["id"].(float64))
 
 	productId, err := strconv.Atoi(c.Param("productId"))
 	if err != nil || uint(productId) == 0 {
@@ -78,7 +78,7 @@ func (handler *productHandler) GetProduct(c *gin.Context) {
 		}
 		c.JSON(http.StatusOK, res)
 	} else {
-		res, err := handler.productService.FindAllByUserId(c, userID)
+		res, err := handler.productService.FindByUserId(c, userID, uint(productId))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 				"error":   "Data Not Found",
@@ -92,7 +92,7 @@ func (handler *productHandler) GetProduct(c *gin.Context) {
 
 func (handler *productHandler) CreateProduct(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
-	userID := userData["id"].(uint)
+	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
 	product := models.Product{}
 
@@ -114,7 +114,7 @@ func (handler *productHandler) CreateProduct(c *gin.Context) {
 		}
 	}
 
-	if res, err := handler.productService.Create(c, userID); err != nil {
+	if res, err := handler.productService.Create(c, product, userID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
 			"message": err.Error(),
@@ -127,7 +127,7 @@ func (handler *productHandler) CreateProduct(c *gin.Context) {
 // only admin to access this feature
 func (handler *productHandler) UpdateProduct(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
-	userID := userData["id"].(uint)
+	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
 	product := models.Product{}
 
@@ -169,7 +169,7 @@ func (handler *productHandler) UpdateProduct(c *gin.Context) {
 		}
 	}
 
-	if res, err := handler.productService.Update(c, uint(productId)); err != nil {
+	if res, err := handler.productService.Update(c, product, uint(productId)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
 			"message": err.Error(),
@@ -182,7 +182,7 @@ func (handler *productHandler) UpdateProduct(c *gin.Context) {
 // only admin to access this feature
 func (handler *productHandler) DeleteProduct(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
-	userID := userData["id"].(uint)
+	userID := uint(userData["id"].(float64))
 
 	// untuk user selain admin di tolak
 	// ONLY ADMIN HAS ACCESS
