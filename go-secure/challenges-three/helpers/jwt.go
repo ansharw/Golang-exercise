@@ -7,8 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
-
-var secretKey = "rahasia"
+// sha256
+// https://emn178.github.io/online-tools/sha256.html
+// rahasia
+var secretKey = "541e984103d4099bb8383050c56d511e733d85e6ab889a1c363ced651762eee0"
 
 func GenerateToken(id uint, email string) string  {
 	claims := jwt.MapClaims{

@@ -5,6 +5,7 @@ import (
 	"challenges-three/models"
 	"challenges-three/repository"
 	"context"
+	"log"
 
 	"github.com/go-playground/validator"
 	"gorm.io/gorm"
@@ -13,8 +14,7 @@ import (
 type productService struct {
 	db          *gorm.DB
 	repoProduct repository.ProductRepository
-	// repoUser        repository.UserRepository
-	validator *validator.Validate
+	validator   *validator.Validate
 }
 
 func NewProductService(db *gorm.DB, repoProduct repository.ProductRepository, validator_ validator.Validate) *productService {
@@ -29,20 +29,82 @@ func (service *productService) FindAll(ctx context.Context) ([]models.Product, e
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	products := service.repoProduct.FindAll(ctx, tx)
-	// pengganti for loop 
-	responseProduct := make([]models.Product, 0, len(products))
-	responseProduct = append(responseProduct, products...)
-	return responseProduct, nil
+	if products, err := service.repoProduct.FindAll(ctx, tx); err != nil {
+		log.Println("Data not found")
+		return products, err
+	} else {
+		return products, nil
+	}
 }
 
 func (service *productService) FindAllByUserId(ctx context.Context, userID uint) ([]models.Product, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	products := service.repoProduct.FindAllByUserId(ctx, tx, userID)
-	// pengganti for loop 
-	responseProduct := make([]models.Product, 0, len(products))
-	responseProduct = append(responseProduct, products...)
-	return responseProduct, nil
+	if products, err := service.repoProduct.FindAllByUserId(ctx, tx, userID); err != nil {
+		log.Println("Data not found")
+		return products, err
+	} else {
+		return products, nil
+	}
+}
+
+func (service *productService) FindById(ctx context.Context, id uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.FindById(ctx, tx, id); err != nil {
+		log.Println("Data not found")
+		return product, err
+	} else {
+		return product, nil
+	}
+}
+
+func (service *productService) FindByUserId(ctx context.Context, userID uint, id uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.FindByUserId(ctx, tx, userID, id); err != nil {
+		log.Println("Data not found")
+		return product, err
+	} else {
+		return product, nil
+	}
+}
+
+func (service *productService) Create(ctx context.Context, product models.Product, userID uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.Create(ctx, tx, product, userID); err != nil {
+		log.Println("Failed to create product")
+		return product, err
+	} else {
+		return product, nil
+	}
+}
+
+func (service *productService) Update(ctx context.Context, product models.Product, id uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.Update(ctx, tx, product, id); err != nil {
+		log.Println("Failed to update product")
+		return product, err
+	} else {
+		return product, nil
+	}
+}
+
+func (service *productService) Delete(ctx context.Context, id uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.Delete(ctx, tx, id); err != nil {
+		log.Println("Failed to delete product")
+		return product, err
+	} else {
+		return product, nil
+	}
 }

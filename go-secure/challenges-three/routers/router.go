@@ -17,24 +17,27 @@ func StartApp() *gin.Engine {
 	validate := validator.New()
 
 	repoProduct := repository.NewProductRepository()
+	repoUser := repository.NewUserRepository()
 
 	serviceProduct := services.NewProductService(db, repoProduct, *validate)
+	serviceUser := services.NewUserService(db, repoUser, *validate)
 
 	handlerProduct := controllers.NewProductHandler(serviceProduct)
+	handlerUser := controllers.NewUserHandler(serviceUser)
 
 	userRouter := r.Group("/users")
 	{
-		userRouter.POST("/register", controllers.UserRegister)
-		userRouter.POST("/login", controllers.UserLogin)
+		userRouter.POST("/register", handlerUser.Register)
+		userRouter.POST("/login", handlerUser.Login)
 	}
 	productRouter := r.Group("/products")
 	{
 		productRouter.Use(middlewares.Authentication())
-		// productRouter.POST("/", controllers.CreateProduct)
-		// productRouter.PUT("/:productId", middlewares.ProductAuthorizations(), controllers.UpdateProduct)
-		// productRouter.GET("/:productId", middlewares.ProductAuthorizations(), controllers.GetProduct)
+		productRouter.POST("/", handlerProduct.CreateProduct)
+		productRouter.PUT("/:productId", middlewares.ProductAuthorizations(), handlerProduct.UpdateProduct)
+		productRouter.GET("/:productId", middlewares.ProductAuthorizations(), handlerProduct.GetProduct)
 		productRouter.GET("/", middlewares.ProductAuthorizations(), handlerProduct.GetAllProducts)
-		// productRouter.DELETE("/:productId", middlewares.ProductAuthorizations(), controllers.DeleteProduct)
+		productRouter.DELETE("/:productId", middlewares.ProductAuthorizations(), handlerProduct.DeleteProduct)
 	}
 
 	return r
