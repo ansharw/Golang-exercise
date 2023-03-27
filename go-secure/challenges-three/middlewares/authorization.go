@@ -16,7 +16,7 @@ func ProductAuthorizations() gin.HandlerFunc {
 		userData := c.MustGet("userData").(jwt.MapClaims)
 		userID := uint(userData["id"].(float64))
 		product := models.Product{}
-
+		
 		if userID == 1 {
 			result := db.Order("id desc").First(&product)
 			if result.RowsAffected == 0 {
@@ -26,26 +26,25 @@ func ProductAuthorizations() gin.HandlerFunc {
 				})
 				return
 			}
-		}
-
-		result := db.Where("user_id = ?", userID).Order("id desc").First(&product)
-		if result.RowsAffected == 0 {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"error":   "Data Not Found",
-				"message": fmt.Sprintln("There is no data"),
-			})
-			return
+		} else {
+			result := db.Where("user_id = ?", userID).Order("id desc").First(&product)
+			if result.RowsAffected == 0 {
+				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+					"error":   "Data Not Found",
+					"message": fmt.Sprintln("There is no data"),
+				})
+				return
+			}
 		}
 
 		// for protect each userid
-		if product.UserID != userID {
+		if userID != 1 && product.UserID != userID {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error":   "Unauthorized",
 				"message": "You are not allowed to access this data",
 			})
 			return
 		}
-
 		c.Next()
 	}
 }

@@ -40,6 +40,7 @@ func (handler *productHandler) GetAllProducts(c *gin.Context) {
 			})
 			return
 		}
+		fmt.Println(res)
 		c.JSON(http.StatusOK, res)
 	} else {
 		res, err := handler.productService.FindAllByUserId(c, userID)
