@@ -20,6 +20,7 @@ var validate = validator.New()
 var productRepo = &repository.ProductRepositoryMock{Mock: mock.Mock{}}
 var serviceProduct = services.NewProductService(db, productRepo, *validate)
 
+// TEST GET ALL PRODUCT FOUND
 func TestFindAllProductsFound(t *testing.T) {
 	// expected result product
 	expectedProduct := []models.Product{
@@ -54,6 +55,7 @@ func TestFindAllProductsFound(t *testing.T) {
 	assert.Equal(t, expectedProduct, products)
 }
 
+// TEST GET ALL PRODUCT NOT FOUND
 func TestFindAllProductsNotFound(t *testing.T) {
 	// expected result product
 	expectedProduct := []models.Product{}
@@ -78,4 +80,53 @@ func TestFindAllProductsNotFound(t *testing.T) {
 	assert.Error(t, err)
 	assert.Len(t, products, 0)
 	assert.Equal(t, expectedProduct, products)
+}
+
+// TEST GET ONE PRODUCT FOUND
+func TestFindByIdProductFound(t *testing.T) {
+	expectedProduct := models.Product{
+		GormModel: models.GormModel{
+			ID: 2,
+		},
+		Title:       "Product 1",
+		Description: "Product 1 Desc",
+		UserID:      2,
+	}
+	var id uint = 2
+	// Set up mock repository
+	productRepo.On("FindById", mock.Anything, mock.Anything, id).Return(expectedProduct, nil)
+
+	// Call service function
+	product, err := serviceProduct.FindById(context.Background(), id)
+
+	// Check if the mock repository was called
+	productRepo.AssertCalled(t, "FindById", mock.Anything, mock.Anything, id)
+
+	// Check if the returned products are correct
+	assert.NoError(t, err)
+	assert.Equal(t, expectedProduct, product)
+}
+
+// TEST GET ONE PRODUCT NOT FOUND
+func TestFindByIdProductNotFound(t *testing.T) {
+	expectedProduct := models.Product{}
+	var id uint = 3
+	// Set up mock repository
+	productRepo.On("FindById", mock.Anything, mock.Anything, id).Return(expectedProduct, errors.New("error"))
+
+	// Call service function
+	var product, err = serviceProduct.FindById(context.Background(), id)
+	// when data is not available, return products and error is false condition
+	// this is force assign to return. because the data is available
+	// this is use for test case only :)
+	// can comment line 123 and 124 when the data is EMPTY
+	err = errors.New("error")
+	product = models.Product{}
+
+	// Check if the mock repository was called
+	productRepo.AssertCalled(t, "FindById", mock.Anything, mock.Anything, id)
+
+	// Check if the returned products are correct
+	assert.Error(t, err)
+	assert.Equal(t, expectedProduct, product)
 }

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"challenges-three/database"
 	"challenges-three/helpers"
 	"challenges-three/models"
 	"challenges-three/services"
@@ -29,7 +28,7 @@ func NewProductHandler(productService services.ProductService) *productHandler {
 // GET, GET ALL, POST
 func (handler *productHandler) GetAllProducts(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
-	userID := uint(userData["id"].(float64))
+	userID := userData["id"].(uint)
 
 	if userID == 1 {
 		res, err := handler.productService.FindAll(c)
@@ -55,60 +54,47 @@ func (handler *productHandler) GetAllProducts(c *gin.Context) {
 	}
 }
 
-
-func GetProduct(c *gin.Context) {
-	db := database.GetConnection()
+func (handler *productHandler) GetProduct(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
-	product := models.Product{}
+	userID := userData["id"].(uint)
 
 	productId, err := strconv.Atoi(c.Param("productId"))
-	if err != nil {
+	if err != nil || uint(productId) == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
 			"message": "invalid product ID",
 		})
 		return
 	}
-	userID := uint(userData["id"].(float64))
 
 	if userID == 1 {
-		err := db.Where("id = ?", productId).First(&product).Error
-		if err != nil || productId == 0 {
+		res, err := handler.productService.FindById(c, uint(productId))
+		if err != nil {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 				"error":   "Data Not Found",
 				"message": fmt.Sprintf("Product with id: %d not found\n", productId),
 			})
 			return
 		}
+		c.JSON(http.StatusOK, res)
+	} else {
+		res, err := handler.productService.FindAllByUserId(c, userID)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+				"error":   "Data Not Found",
+				"message": fmt.Sprintf("Product with id: %d not found\n", productId),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, res)
 	}
-
-	// err := db.Debug().Where("id = ? AND user_id = ?", productId, userID).First(&product).Error
-	err_ := db.Where("id = ? AND user_id = ?", productId, userID).First(&product).Error
-
-	if err_ != nil || productId == 0 {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"error":   "Data Not Found",
-			"message": fmt.Sprintf("Product with id: %d not found\n", productId),
-		})
-		return
-	}
-
-	product.UserID = userID
-	product.ID = uint(productId)
-
-	c.JSON(http.StatusOK, product)
 }
 
-func CreateProduct(c *gin.Context) {
-	db := database.GetConnection()
+func (handler *productHandler) CreateProduct(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
+	userID := userData["id"].(uint)
 	contentType := helpers.GetContentType(c)
-
 	product := models.Product{}
-	userID := uint(userData["id"].(float64))
-
-	// set initial userid for post method
-	product.UserID = userID
 
 	if contentType == appJson {
 		if err := c.ShouldBindJSON(&product); err != nil {
@@ -128,27 +114,25 @@ func CreateProduct(c *gin.Context) {
 		}
 	}
 
-	// err := db.Debug().Create(&product).Error
-	if err := db.Create(&product).Error; err != nil {
+	if res, err := handler.productService.Create(c, userID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
 			"message": err.Error(),
 		})
-		return
+	} else {
+		c.JSON(http.StatusCreated, res)
 	}
-
-	c.JSON(http.StatusCreated, product)
 }
 
 // only admin to access this feature
-func UpdateProduct(c *gin.Context) {
-	db := database.GetConnection()
+func (handler *productHandler) UpdateProduct(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
+	userID := userData["id"].(uint)
 	contentType := helpers.GetContentType(c)
+	product := models.Product{}
 
 	// untuk user selain admin di tolak
 	// ONLY ADMIN HAS ACCESS
-	userID := uint(userData["id"].(float64))
 	if userID != 1 {
 		c.JSON(http.StatusForbidden, gin.H{
 			"error":   "Access denied",
@@ -157,7 +141,7 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	product := models.Product{}
+	// error ProductID
 	productId, err := strconv.Atoi(c.Param("productId"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -185,29 +169,23 @@ func UpdateProduct(c *gin.Context) {
 		}
 	}
 
-	product.ID = uint(productId)
-
-	err_ := db.Model(&product).Where("id = ?", productId).Updates(models.Product{Title: product.Title, Description: product.Description}).Error
-
-	if err_ != nil {
+	if res, err := handler.productService.Update(c, uint(productId)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
 			"message": err.Error(),
 		})
-		return
+	} else {
+		c.JSON(http.StatusOK, res)
 	}
-	c.JSON(http.StatusOK, product)
 }
 
 // only admin to access this feature
-func DeleteProduct(c *gin.Context) {
-	db := database.GetConnection()
+func (handler *productHandler) DeleteProduct(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
-	product := models.Product{}
+	userID := userData["id"].(uint)
 
 	// untuk user selain admin di tolak
 	// ONLY ADMIN HAS ACCESS
-	userID := uint(userData["id"].(float64))
 	if userID != 1 {
 		c.JSON(http.StatusForbidden, gin.H{
 			"error":   "Access denied",
@@ -217,7 +195,7 @@ func DeleteProduct(c *gin.Context) {
 	}
 
 	productId, err := strconv.Atoi(c.Param("productId"))
-	if err != nil {
+	if err != nil || uint(productId) == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
 			"message": "invalid product ID",
@@ -225,26 +203,15 @@ func DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	err = db.Model(&product).Where("id = ?", productId).First(&product).Error
-	if err != nil || productId == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error":   "Data not found",
-			"message": "Product doesn't exist",
-		})
-		return
-	}
-
-	err = db.Model(&product).Where("id = ?", productId).Delete(&product).Error
-
-	if err != nil {
+	if _, err := handler.productService.Delete(c, uint(productId)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Internal Server Error",
 			"message": "Failed to delete product",
 		})
 		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Product deleted successfully",
+		})
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Product deleted successfully",
-	})
 }

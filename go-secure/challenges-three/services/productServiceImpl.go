@@ -33,9 +33,6 @@ func (service *productService) FindAll(ctx context.Context) ([]models.Product, e
 		log.Println("Data not found")
 		return products, err
 	} else {
-		// pengganti for loop
-		// responseProduct := make([]models.Product, 0, len(products))
-		// responseProduct = append(responseProduct, products...)
 		return products, nil
 	}
 }
@@ -44,9 +41,70 @@ func (service *productService) FindAllByUserId(ctx context.Context, userID uint)
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	products := service.repoProduct.FindAllByUserId(ctx, tx, userID)
-	// pengganti for loop
-	responseProduct := make([]models.Product, 0, len(products))
-	responseProduct = append(responseProduct, products...)
-	return responseProduct, nil
+	if products, err := service.repoProduct.FindAllByUserId(ctx, tx, userID); err != nil {
+		log.Println("Data not found")
+		return products, err
+	} else {
+		return products, nil
+	}
+}
+
+func (service *productService) FindById(ctx context.Context, id uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.FindById(ctx, tx, id); err != nil {
+		log.Println("Data not found")
+		return product, err
+	} else {
+		return product, nil
+	}
+}
+
+func (service *productService) FindByUserId(ctx context.Context, userID uint, id uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.FindByUserId(ctx, tx, userID, id); err != nil {
+		log.Println("Data not found")
+		return product, err
+	} else {
+		return product, nil
+	}
+}
+
+func (service *productService) Create(ctx context.Context, userID uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.Create(ctx, tx, userID); err != nil {
+		log.Println("Failed to create product")
+		return product, err
+	} else {
+		return product, nil
+	}
+}
+
+func (service *productService) Update(ctx context.Context, id uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.Update(ctx, tx, id); err != nil {
+		log.Println("Failed to update product")
+		return product, err
+	} else {
+		return product, nil
+	}
+}
+
+func (service *productService) Delete(ctx context.Context, id uint) (models.Product, error) {
+	tx := service.db.Begin()
+	defer helpers.CommitOrRollback(tx)
+
+	if product, err := service.repoProduct.Delete(ctx, tx, id); err != nil {
+		log.Println("Failed to delete product")
+		return product, err
+	} else {
+		return product, nil
+	}
 }

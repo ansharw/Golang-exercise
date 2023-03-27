@@ -9,9 +9,10 @@ import (
 
 type ProductRepository interface {
 	FindAll(ctx context.Context, tx *gorm.DB) ([]models.Product, error)
-	FindAllByUserId(ctx context.Context, tx *gorm.DB, userID uint) []models.Product
-	// FindById(ctx context.Context, tx *sql.Tx, id int) domain.Content
-	// Create(ctx context.Context, tx *sql.Tx, content domain.Content) *int
-	// Update(ctx context.Context, tx *sql.Tx, content domain.Content)
-	// Delete(ctx context.Context, tx *sql.Tx, id int)
+	FindAllByUserId(ctx context.Context, tx *gorm.DB, userID uint) ([]models.Product, error)
+	FindById(ctx context.Context, tx *gorm.DB, id uint) (models.Product, error)
+	FindByUserId(ctx context.Context, tx *gorm.DB, userID uint, id uint) (models.Product, error)
+	Create(ctx context.Context, tx *gorm.DB, userID uint) (models.Product, error)
+	Update(ctx context.Context, tx *gorm.DB, id uint) (models.Product, error)
+	Delete(ctx context.Context, tx *gorm.DB, id uint) (models.Product, error)
 }

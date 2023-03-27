@@ -19,24 +19,64 @@ func (repo *productRepository) FindAll(ctx context.Context, tx *gorm.DB) ([]mode
 	products := []models.Product{}
 	if err := tx.WithContext(ctx).Order("id DESC").Find(&products).Error; err != nil {
 		log.Println("Error finding all products:", err)
-		// default value []struct is nil if data not found
-		return products, nil
+		return products, err
 	}
 	return products, nil
 }
 
-func (repo *productRepository) FindAllByUserId(ctx context.Context, tx *gorm.DB, userID uint) []models.Product {
+func (repo *productRepository) FindAllByUserId(ctx context.Context, tx *gorm.DB, userID uint) ([]models.Product, error) {
 	products := []models.Product{}
 	if err := tx.WithContext(ctx).Where("user_id = ?", userID).Order("id DESC").Find(&products).Error; err != nil {
 		log.Println("Error finding all products:", err)
+		return products, err
 	}
-	return products
+	return products, nil
 }
 
-func (repo *productRepository) FindById(ctx context.Context, tx *gorm.DB, userID uint, id int) models.Product {
+// admin
+func (repo *productRepository) FindById(ctx context.Context, tx *gorm.DB, id uint) (models.Product, error) {
 	product := models.Product{}
-	if err := tx.WithContext(ctx).Where("user_id = ? AND id = ?", userID, id).Order("id DESC").First(&product).Error; err != nil {
+	if err := tx.WithContext(ctx).Where("id = ?", id).First(&product).Error; err != nil {
 		log.Println("Error finding product:", err)
+		return product, err
 	}
-	return product
+	return product, nil
+}
+
+// user
+func (repo *productRepository) FindByUserId(ctx context.Context, tx *gorm.DB, userID uint, id uint) (models.Product, error) {
+	product := models.Product{}
+	if err := tx.WithContext(ctx).Where("user_id = ? AND id = ?", userID, id).First(&product).Error; err != nil {
+		log.Println("Error finding product:", err)
+		return product, err
+	}
+	return product, nil
+}
+
+func (repo *productRepository) Create(ctx context.Context, tx *gorm.DB, userID uint) (models.Product, error) {
+	product := models.Product{}
+	product.UserID = userID
+	if err := tx.WithContext(ctx).Create(&product).Error; err != nil {
+		log.Println("Error creating product:", err)
+		return product, err
+	}
+	return product, nil
+}
+
+func (repo *productRepository) Update(ctx context.Context, tx *gorm.DB, id uint) (models.Product, error) {
+	product := models.Product{}
+	if err := tx.WithContext(ctx).Model(&product).Where("id = ?", id).Updates(models.Product{Title: product.Title, Description: product.Description}).Error; err != nil {
+		log.Println("Error updating product:", err)
+		return product, err
+	}
+	return product, nil
+}
+
+func (repo *productRepository) Delete(ctx context.Context, tx *gorm.DB, id uint) (models.Product, error) {
+	product := models.Product{}
+	if err := tx.WithContext(ctx).Where("id = ?", id).First(&product).Error; err != nil {
+		log.Println("Error deleting product:", err)
+		return product, err
+	}
+	return product, nil
 }
