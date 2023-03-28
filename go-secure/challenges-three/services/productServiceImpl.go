@@ -7,21 +7,20 @@ import (
 	"context"
 	"log"
 
-	"github.com/go-playground/validator"
 	"gorm.io/gorm"
 )
 
 type productService struct {
 	db          *gorm.DB
 	repoProduct repository.ProductRepository
-	validator   *validator.Validate
+	// validator   *validator.Validate
 }
 
-func NewProductService(db *gorm.DB, repoProduct repository.ProductRepository, validator_ validator.Validate) *productService {
+func NewProductService(db *gorm.DB, repoProduct repository.ProductRepository) *productService {
 	return &productService{
 		db:          db,
 		repoProduct: repoProduct,
-		validator:   &validator_,
+		// validator:   &validator_,
 	}
 }
 
