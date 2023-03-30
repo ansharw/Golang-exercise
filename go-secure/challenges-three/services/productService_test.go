@@ -9,16 +9,16 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/go-playground/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 var db = database.GetConnection()
-var validate = validator.New()
+
+// var validate = validator.New()
 
 var productRepo = &repository.ProductRepositoryMock{Mock: mock.Mock{}}
-var serviceProduct = services.NewProductService(db, productRepo, *validate)
+var serviceProduct = services.NewProductService(db, productRepo)
 
 // TEST GET ALL PRODUCT FOUND
 func TestFindAllProductsFound(t *testing.T) {
@@ -110,18 +110,12 @@ func TestFindByIdProductFound(t *testing.T) {
 // TEST GET ONE PRODUCT NOT FOUND
 func TestFindByIdProductNotFound(t *testing.T) {
 	expectedProduct := models.Product{}
-	var id uint = 3
+	var id uint = 200
 	// Set up mock repository
 	productRepo.On("FindById", mock.Anything, mock.Anything, id).Return(expectedProduct, errors.New("error"))
 
 	// Call service function
 	var product, err = serviceProduct.FindById(context.Background(), id)
-	// when data is not available, return products and error is false condition
-	// this is force assign to return. because the data is available
-	// this is use for test case only :)
-	// can comment line 123 and 124 when the data is EMPTY
-	err = errors.New("error")
-	product = models.Product{}
 
 	// Check if the mock repository was called
 	productRepo.AssertCalled(t, "FindById", mock.Anything, mock.Anything, id)

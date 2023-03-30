@@ -8,19 +8,18 @@ import (
 	"challenges-three/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator"
 )
 
 func StartApp() *gin.Engine {
 	r := gin.Default()
 	db := database.GetConnection()
-	validate := validator.New()
+	// validate := validator.New()
 
 	repoProduct := repository.NewProductRepository()
 	repoUser := repository.NewUserRepository()
 
-	serviceProduct := services.NewProductService(db, repoProduct, *validate)
-	serviceUser := services.NewUserService(db, repoUser, *validate)
+	serviceProduct := services.NewProductService(db, repoProduct)
+	serviceUser := services.NewUserService(db, repoUser)
 
 	handlerProduct := controllers.NewProductHandler(serviceProduct)
 	handlerUser := controllers.NewUserHandler(serviceUser)

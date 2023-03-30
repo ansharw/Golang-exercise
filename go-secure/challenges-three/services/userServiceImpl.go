@@ -7,21 +7,20 @@ import (
 	"context"
 	"errors"
 
-	"github.com/go-playground/validator"
 	"gorm.io/gorm"
 )
 
 type userService struct {
-	db        *gorm.DB
-	repoUser  repository.UserRepository
-	validator *validator.Validate
+	db       *gorm.DB
+	repoUser repository.UserRepository
+	// validator *validator.Validate
 }
 
-func NewUserService(db *gorm.DB, repoUser repository.UserRepository, validator_ validator.Validate) *userService {
+func NewUserService(db *gorm.DB, repoUser repository.UserRepository) *userService {
 	return &userService{
-		db:        db,
-		repoUser:  repoUser,
-		validator: &validator_,
+		db:       db,
+		repoUser: repoUser,
+		// validator: &validator_,
 	}
 }
 
