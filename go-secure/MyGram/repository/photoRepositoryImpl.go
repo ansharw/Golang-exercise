@@ -33,7 +33,12 @@ func (repo *photoRepository) FindByUserId(ctx context.Context, tx *gorm.DB, user
 	return photos, nil
 }
 
-func (repo *photoRepository) Create(ctx context.Context, tx *gorm.DB, photo model.Photo, userID uint) (model.Photo, error) {
+func (repo *photoRepository) Create(ctx context.Context, tx *gorm.DB, req model.RequestPhoto, userID uint) (model.Photo, error) {
+	// photo.UserID = userID
+	photo := model.Photo{}
+	photo.Title = req.Title
+	photo.PhotoURL = req.PhotoURL
+	photo.Caption = req.Caption
 	photo.UserID = userID
 	if err := tx.WithContext(ctx).Create(&photo).Error; err != nil {
 		log.Println("Error creating photo:", err)
@@ -42,8 +47,9 @@ func (repo *photoRepository) Create(ctx context.Context, tx *gorm.DB, photo mode
 	return photo, nil
 }
 
-func (repo *photoRepository) Update(ctx context.Context, tx *gorm.DB, photo model.Photo, id, userID uint) (model.Photo, error) {
-	if err := tx.WithContext(ctx).Model(&photo).Where("id = ? AND user_id = ?", id, userID).Updates(model.Photo{GormModel: model.GormModel{ID: id}, Title: photo.Title, Caption: photo.Caption, PhotoURL: photo.PhotoURL}).Error; err != nil {
+func (repo *photoRepository) Update(ctx context.Context, tx *gorm.DB, req model.RequestPhoto, id, userID uint) (model.Photo, error) {
+	photo := model.Photo{}
+	if err := tx.WithContext(ctx).Model(&photo).Where("id = ? AND user_id = ?", id, userID).Updates(model.Photo{GormModel: model.GormModel{ID: id}, Title: req.Title, Caption: req.Caption, PhotoURL: req.PhotoURL}).Error; err != nil {
 		log.Printf("Error updating photo: %+v data doesn't match\n", err)
 		return photo, err
 	}

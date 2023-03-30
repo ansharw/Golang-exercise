@@ -33,7 +33,10 @@ func (repo *socialMediaRepository) FindByUserId(ctx context.Context, tx *gorm.DB
 	return socialMedias, nil
 }
 
-func (repo *socialMediaRepository) Create(ctx context.Context, tx *gorm.DB, socialMedia model.SocialMedia, userID uint) (model.SocialMedia, error) {
+func (repo *socialMediaRepository) Create(ctx context.Context, tx *gorm.DB, req model.RequestSocialMedia, userID uint) (model.SocialMedia, error) {
+	socialMedia := model.SocialMedia{}
+	socialMedia.Name = req.Name
+	socialMedia.SocialMediaURL = req.SocialMediaURL
 	socialMedia.UserID = userID
 	if err := tx.WithContext(ctx).Create(&socialMedia).Error; err != nil {
 		log.Println("Error creating social media:", err)
@@ -42,8 +45,9 @@ func (repo *socialMediaRepository) Create(ctx context.Context, tx *gorm.DB, soci
 	return socialMedia, nil
 }
 
-func (repo *socialMediaRepository) Update(ctx context.Context, tx *gorm.DB, socialMedia model.SocialMedia, id, userID uint) (model.SocialMedia, error) {
-	if err := tx.WithContext(ctx).Model(&socialMedia).Where("id = ? AND user_id = ?", id, userID).Updates(model.SocialMedia{GormModel: model.GormModel{ID: id}, Name: socialMedia.Name, SocialMediaURL: socialMedia.SocialMediaURL}).Error; err != nil {
+func (repo *socialMediaRepository) Update(ctx context.Context, tx *gorm.DB, req model.RequestSocialMedia, id, userID uint) (model.SocialMedia, error) {
+	socialMedia := model.SocialMedia{}
+	if err := tx.WithContext(ctx).Model(&socialMedia).Where("id = ? AND user_id = ?", id, userID).Updates(model.SocialMedia{GormModel: model.GormModel{ID: id}, Name: req.Name, SocialMediaURL: req.SocialMediaURL}).Error; err != nil {
 		log.Printf("Error updating social media: %+v data doesn't match\n", err)
 		return socialMedia, err
 	}
