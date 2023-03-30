@@ -75,34 +75,51 @@ func (handler *photoHandler) CreatePhoto(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	photo := model.Photo{}
+	photo := model.RequestPhoto{}
 
 	// bind title, caption (optional), photo_url
 	if contentType == appJson {
 		if err := c.ShouldBindJSON(&photo); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Title":
+						errMsg = "Invalid title."
+					case "Caption":
+						errMsg = "Invalid caption."
+					case "PhotoURL":
+						errMsg = "Invalid photo url."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request json",
+					"message": errMsg,
+				})
+				return
+			}
 		}
 	} else {
 		if err := c.ShouldBind(&photo); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Title":
+						errMsg = "Invalid title."
+					case "Caption":
+						errMsg = "Invalid caption."
+					case "PhotoURL":
+						errMsg = "Invalid photo url."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request form",
+					"message": errMsg,
+				})
+				return
+			}
 		}
-	}
-
-	// validate input json or form
-	if err := handler.validate.Struct(photo); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
 	}
 
 	if res, err := handler.photoService.Create(c, photo, userID); err != nil {
@@ -121,7 +138,7 @@ func (handler *photoHandler) UpdatePhoto(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	photo := model.Photo{}
+	photo := model.RequestPhoto{}
 
 	// Get Param PhotoID
 	photoId, err := strconv.Atoi(c.Param("photoId"))
@@ -136,29 +153,46 @@ func (handler *photoHandler) UpdatePhoto(c *gin.Context) {
 	// bind title, caption (optional), photo_url
 	if contentType == appJson {
 		if err := c.ShouldBindJSON(&photo); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Title":
+						errMsg = "Invalid title."
+					case "Caption":
+						errMsg = "Invalid caption."
+					case "PhotoURL":
+						errMsg = "Invalid photo url."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request json",
+					"message": errMsg,
+				})
+				return
+			}
 		}
 	} else {
 		if err := c.ShouldBind(&photo); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Title":
+						errMsg = "Invalid title."
+					case "Caption":
+						errMsg = "Invalid caption."
+					case "PhotoURL":
+						errMsg = "Invalid photo url."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request form",
+					"message": errMsg,
+				})
+				return
+			}
 		}
-	}
-
-	// validate input json or form
-	if err := handler.validate.Struct(photo); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
 	}
 
 	if res, err := handler.photoService.Update(c, photo, uint(photoId), userID); err != nil {

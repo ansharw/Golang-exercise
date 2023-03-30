@@ -46,11 +46,11 @@ func (service *socialMediaService) FindByUserId(ctx context.Context, userID uint
 	}
 }
 
-func (service *socialMediaService) Create(ctx context.Context, socialMedia model.SocialMedia, userID uint) (model.SocialMedia, error) {
+func (service *socialMediaService) Create(ctx context.Context, req model.RequestSocialMedia, userID uint) (model.SocialMedia, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if socialMedia, err := service.repoSocialMedia.Create(ctx, tx, socialMedia, userID); err != nil {
+	if socialMedia, err := service.repoSocialMedia.Create(ctx, tx, req, userID); err != nil {
 		log.Println("Failed to create socialMedia")
 		return socialMedia, err
 	} else {
@@ -58,11 +58,11 @@ func (service *socialMediaService) Create(ctx context.Context, socialMedia model
 	}
 }
 
-func (service *socialMediaService) Update(ctx context.Context, socialMedia model.SocialMedia, id, userID uint) (model.SocialMedia, error) {
+func (service *socialMediaService) Update(ctx context.Context, req model.RequestSocialMedia, id, userID uint) (model.SocialMedia, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if socialMedia, err := service.repoSocialMedia.Update(ctx, tx, socialMedia, id, userID); err != nil {
+	if socialMedia, err := service.repoSocialMedia.Update(ctx, tx, req, id, userID); err != nil {
 		log.Println("Failed to update socialMedia")
 		return socialMedia, err
 	} else {

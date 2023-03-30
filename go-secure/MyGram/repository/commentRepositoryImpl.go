@@ -33,9 +33,13 @@ func (repo *commentRepository) FindByPhotoId(ctx context.Context, tx *gorm.DB, p
 	return comments, nil
 }
 
-func (repo *commentRepository) Create(ctx context.Context, tx *gorm.DB, comment model.Comment, userID, photoID uint) (model.Comment, error) {
-	comment.UserID = userID
+func (repo *commentRepository) Create(ctx context.Context, tx *gorm.DB, req model.RequestComment, userID, photoID uint) (model.Comment, error) {
+	// comment.UserID = userID
+	// comment.PhotoID = photoID
+	comment := model.Comment{}
+	comment.Message = req.Message
 	comment.PhotoID = photoID
+	comment.UserID = userID
 	if err := tx.WithContext(ctx).Create(&comment).Error; err != nil {
 		log.Println("Error creating comment:", err)
 		return comment, err
@@ -43,8 +47,9 @@ func (repo *commentRepository) Create(ctx context.Context, tx *gorm.DB, comment 
 	return comment, nil
 }
 
-func (repo *commentRepository) Update(ctx context.Context, tx *gorm.DB, comment model.Comment, id, userID, photoID uint) (model.Comment, error) {
-	if err := tx.WithContext(ctx).Model(&comment).Where("id = ? AND user_id = ? AND photo_id = ?", id, userID, photoID).Updates(model.Comment{GormModel: model.GormModel{ID: id}, Message: comment.Message}).Error; err != nil {
+func (repo *commentRepository) Update(ctx context.Context, tx *gorm.DB, req model.RequestComment, id, userID, photoID uint) (model.Comment, error) {
+	comment := model.Comment{}
+	if err := tx.WithContext(ctx).Model(&comment).Where("id = ? AND user_id = ? AND photo_id = ?", id, userID, photoID).Updates(model.Comment{GormModel: model.GormModel{ID: id}, Message: req.Message}).Error; err != nil {
 		log.Printf("Error updating comment: %+v data doesn't match\n", err)
 		return comment, err
 	}

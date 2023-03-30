@@ -52,15 +52,6 @@ func (handler *commentHandler) GetAllComment(c *gin.Context) {
 		}
 	}
 
-	// validate input bind json or form
-	if err := handler.validate.Struct(comment); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
-	}
-
 	res, err := handler.commentService.FindAllByPhotoId(c, comment.PhotoID)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -119,15 +110,6 @@ func (handler *commentHandler) GetComment(c *gin.Context) {
 		return
 	}
 
-	// validate input json or form
-	if err := handler.validate.Struct(comment); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
-	}
-
 	c.JSON(http.StatusOK, res)
 }
 
@@ -137,34 +119,51 @@ func (handler *commentHandler) CreateComment(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.Comment{}
+	comment := model.RequestComment{}
 
 	// bind messange, photo_id
 	if contentType == appJson {
 		if err := c.ShouldBindJSON(&comment); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Message":
+						errMsg = "Invalid title."
+					case "Caption":
+						errMsg = "Invalid caption."
+					case "PhotoID":
+						errMsg = "Invalid photo_id."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request json",
+					"message": errMsg,
+				})
+				return
+			}
 		}
 	} else {
 		if err := c.ShouldBind(&comment); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Message":
+						errMsg = "Invalid title."
+					case "Caption":
+						errMsg = "Invalid caption."
+					case "PhotoID":
+						errMsg = "Invalid photo_id."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request form",
+					"message": errMsg,
+				})
+				return
+			}
 		}
-	}
-
-	// validate input json or form
-	if err := handler.validate.Struct(comment); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
 	}
 
 	if res, err := handler.commentService.Create(c, comment, userID, comment.PhotoID); err != nil {
@@ -183,7 +182,7 @@ func (handler *commentHandler) UpdateComment(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.Comment{}
+	comment := model.RequestComment{}
 
 	// Get param commentId
 	commentId, err := strconv.Atoi(c.Param("commentId"))
@@ -198,29 +197,46 @@ func (handler *commentHandler) UpdateComment(c *gin.Context) {
 	// bind message, photo_id
 	if contentType == appJson {
 		if err := c.ShouldBindJSON(&comment); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Message":
+						errMsg = "Invalid title."
+					case "Caption":
+						errMsg = "Invalid caption."
+					case "PhotoID":
+						errMsg = "Invalid photo_id."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request json",
+					"message": errMsg,
+				})
+				return
+			}
 		}
 	} else {
 		if err := c.ShouldBind(&comment); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Message":
+						errMsg = "Invalid title."
+					case "Caption":
+						errMsg = "Invalid caption."
+					case "PhotoID":
+						errMsg = "Invalid photo_id."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request form",
+					"message": errMsg,
+				})
+				return
+			}
 		}
-	}
-
-	// validate input json or form
-	if err := handler.validate.Struct(comment); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
 	}
 
 	if res, err := handler.commentService.Update(c, comment, uint(commentId), userID, comment.PhotoID); err != nil {
@@ -239,7 +255,7 @@ func (handler *commentHandler) DeleteComment(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.Comment{}
+	comment := model.RequestDeleteComment{}
 
 	// Get param commentId
 	commentId, err := strconv.Atoi(c.Param("commentId"))
@@ -254,29 +270,38 @@ func (handler *commentHandler) DeleteComment(c *gin.Context) {
 	// bind photo_id
 	if contentType == appJson {
 		if err := c.ShouldBindJSON(&comment); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "PhotoID":
+						errMsg = "Invalid photo_id."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request json",
+					"message": errMsg,
+				})
+				return
+			}
 		}
 	} else {
 		if err := c.ShouldBind(&comment); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "PhotoID":
+						errMsg = "Invalid photo_id."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request form",
+					"message": errMsg,
+				})
+				return
+			}
 		}
-	}
-
-	// validate input json or form
-	if err := handler.validate.Struct(comment); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
 	}
 
 	if _, err := handler.commentService.Delete(c, uint(commentId), userID, comment.PhotoID); err != nil {

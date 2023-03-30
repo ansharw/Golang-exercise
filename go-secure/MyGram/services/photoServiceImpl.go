@@ -46,11 +46,11 @@ func (service *photoService) FindByUserId(ctx context.Context, userID uint, id u
 	}
 }
 
-func (service *photoService) Create(ctx context.Context, photo model.Photo, userID uint) (model.Photo, error) {
+func (service *photoService) Create(ctx context.Context, req model.RequestPhoto, userID uint) (model.Photo, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if photo, err := service.repoPhoto.Create(ctx, tx, photo, userID); err != nil {
+	if photo, err := service.repoPhoto.Create(ctx, tx, req, userID); err != nil {
 		log.Println("Failed to create photo")
 		return photo, err
 	} else {
@@ -58,11 +58,11 @@ func (service *photoService) Create(ctx context.Context, photo model.Photo, user
 	}
 }
 
-func (service *photoService) Update(ctx context.Context, photo model.Photo, id, userID uint) (model.Photo, error) {
+func (service *photoService) Update(ctx context.Context, req model.RequestPhoto, id, userID uint) (model.Photo, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if photo, err := service.repoPhoto.Update(ctx, tx, photo, id, userID); err != nil {
+	if photo, err := service.repoPhoto.Update(ctx, tx, req, id, userID); err != nil {
 		log.Println("Failed to update photo")
 		return photo, err
 	} else {

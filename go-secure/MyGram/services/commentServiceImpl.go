@@ -46,11 +46,11 @@ func (service *commentService) FindByPhotoId(ctx context.Context, photoID uint, 
 	}
 }
 
-func (service *commentService) Create(ctx context.Context, comment model.Comment, userID, photoID uint) (model.Comment, error) {
+func (service *commentService) Create(ctx context.Context, req model.RequestComment, userID, photoID uint) (model.Comment, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if photo, err := service.repoComment.Create(ctx, tx, comment, userID, photoID); err != nil {
+	if photo, err := service.repoComment.Create(ctx, tx, req, userID, photoID); err != nil {
 		log.Println("Failed to create photo")
 		return photo, err
 	} else {
@@ -58,11 +58,11 @@ func (service *commentService) Create(ctx context.Context, comment model.Comment
 	}
 }
 
-func (service *commentService) Update(ctx context.Context, comment model.Comment, id, userID, photoID uint) (model.Comment, error) {
+func (service *commentService) Update(ctx context.Context, req model.RequestComment, id, userID, photoID uint) (model.Comment, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if photo, err := service.repoComment.Update(ctx, tx, comment, id, userID, photoID); err != nil {
+	if photo, err := service.repoComment.Update(ctx, tx, req, id, userID, photoID); err != nil {
 		log.Println("Failed to update photo")
 		return photo, err
 	} else {

@@ -21,7 +21,7 @@ func SocialMediaAuthorizations() gin.HandlerFunc {
 		if result.RowsAffected == 0 {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 				"error":   "Data Not Found",
-				"message": fmt.Sprintln("There is no data"),
+				"message": fmt.Sprintln("There is no data social media"),
 			})
 			return
 		}
@@ -49,7 +49,7 @@ func CommentAuthorizations() gin.HandlerFunc {
 		if result.RowsAffected == 0 {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 				"error":   "Data Not Found",
-				"message": fmt.Sprintln("There is no data"),
+				"message": fmt.Sprintln("There is no data comment"),
 			})
 			return
 		}
@@ -77,7 +77,7 @@ func PhotoAuthorizations() gin.HandlerFunc {
 		if result.RowsAffected == 0 {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 				"error":   "Data Not Found",
-				"message": fmt.Sprintln("There is no data"),
+				"message": fmt.Sprintln("There is no data photo"),
 			})
 			return
 		}

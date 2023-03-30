@@ -57,7 +57,7 @@ func (handler *socialMediaHandler) GetSocialMedia(c *gin.Context) {
 		})
 		return
 	}
-
+	
 	res, err := handler.socialMediaService.FindByUserId(c, userID, uint(socialMediaId))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
@@ -75,34 +75,47 @@ func (handler *socialMediaHandler) CreateSocialMedia(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	socialMedia := model.SocialMedia{}
+	socialMedia := model.RequestSocialMedia{}
 
 	// bind name, social_media_url
 	if contentType == appJson {
 		if err := c.ShouldBindJSON(&socialMedia); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Name":
+						errMsg = "Invalid name."
+					case "SocialMediaURL":
+						errMsg = "Invalid url."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request json",
+					"message": errMsg,
+				})
+				return
+			}
 		}
 	} else {
 		if err := c.ShouldBind(&socialMedia); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Name":
+						errMsg = "Invalid name."
+					case "SocialMediaURL":
+						errMsg = "Invalid url."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request form",
+					"message": errMsg,
+				})
+				return
+			}
 		}
-	}
-
-	// validate input json or form
-	if err := handler.validate.Struct(socialMedia); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
 	}
 
 	if res, err := handler.socialMediaService.Create(c, socialMedia, userID); err != nil {
@@ -121,7 +134,7 @@ func (handler *socialMediaHandler) UpdateSocialMedia(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	socialMedia := model.SocialMedia{}
+	socialMedia := model.RequestSocialMedia{}
 
 	// Get Param socialMediaID
 	socialMediaId, err := strconv.Atoi(c.Param("socialMediaId"))
@@ -136,29 +149,42 @@ func (handler *socialMediaHandler) UpdateSocialMedia(c *gin.Context) {
 	// bind name, social_media_url
 	if contentType == appJson {
 		if err := c.ShouldBindJSON(&socialMedia); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Name":
+						errMsg = "Invalid name."
+					case "SocialMediaURL":
+						errMsg = "Invalid url."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request json",
+					"message": errMsg,
+				})
+				return
+			}
 		}
 	} else {
 		if err := c.ShouldBind(&socialMedia); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error":   "Bad Request",
-				"message": err.Error(),
-			})
-			return
+			if errors, ok := err.(validator.ValidationErrors); ok {
+				var errMsg string
+				for _, e := range errors {
+					switch e.Field() {
+					case "Name":
+						errMsg = "Invalid name."
+					case "SocialMediaURL":
+						errMsg = "Invalid url."
+					}
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"error":   "Bad Request form",
+					"message": errMsg,
+				})
+				return
+			}
 		}
-	}
-
-	// validate input json or form
-	if err := handler.validate.Struct(socialMedia); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
 	}
 
 	if res, err := handler.socialMediaService.Update(c, socialMedia, uint(socialMediaId), userID); err != nil {
