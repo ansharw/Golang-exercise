@@ -12,3 +12,23 @@ type RequestUserLogin struct {
 	Email    string `gorm:"-:all" json:"email" form:"email" binding:"required,email"`
 	Password string `gorm:"-:all" json:"password" form:"password" binding:"required,min=6"`
 }
+
+// response
+type ResponseErrorGeneral struct {
+	Status  string `json:"error"`
+	Message string `json:"message"`
+}
+
+type ResponseRegistered struct {
+	Id  uint `json:"id"`
+	Email string `json:"email"`
+	Username string `json:"username"`
+}
+
+type ResponseDeleted struct {
+	Message  string `json:"message"`
+}
+
+type ResponseToken struct {
+	Token  string `json:"token"`
+}
