@@ -9,8 +9,23 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+
+	_ "MyGram/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title          	Swagger MyGram API
+// @version        	1.0
+// @description    	This is a sample server MyGram server.
+// @contact.name   	ansharw
+// @host      		localhost:8080
+// BasePath 		/
+// @securityDefinitions.apikey token
+// @in header
+// @name Authentication
+// @description token for authentication 
+// @externalDocs.description  OpenAPI
 func StartApp() *gin.Engine {
 	r := gin.Default()
 	db := database.GetConnection()
@@ -66,6 +81,8 @@ func StartApp() *gin.Engine {
 		commentRouter.PUT("/:commentId", middlewares.CommentAuthorizations(), handlerComment.UpdateComment)
 		commentRouter.DELETE("/:commentId", middlewares.CommentAuthorizations(), handlerComment.DeleteComment)
 	}
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return r
 }
