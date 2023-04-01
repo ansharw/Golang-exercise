@@ -4,11 +4,11 @@ import "time"
 
 // initial for gorm struct to create database
 type Book struct {
-	Id        uint64    `gorm:"column:id;primaryKey"`
-	NameBook  string    `gorm:"column:name_book"`
-	Author    string    `gorm:"column:author"`
-	CreatedAt time.Time `gorm:"column:created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at"`
+	Id        uint64    `gorm:"column:id;primaryKey" json:"id"`
+	NameBook  string    `gorm:"column:name_book" json:"name_book"`
+	Author    string    `gorm:"column:author" json:"author"`
+	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
 }
 
 // request json format
