@@ -16,8 +16,8 @@ var (
 	user     = "postgres"
 	password = "postgres"
 	dbname   = "my_gram"
-	db       *gorm.DB
-	err      error
+	// db       *gorm.DB
+	// err      error
 )
 
 func GetConnection() *gorm.DB {
