@@ -34,7 +34,7 @@ func (service *userService) Login(ctx context.Context, user model.RequestUserLog
 	}
 }
 
-func (service *userService) Register(ctx context.Context, user model.User) (model.User, error) {
+func (service *userService) Register(ctx context.Context, user model.RequestUserRegister) (model.User, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 

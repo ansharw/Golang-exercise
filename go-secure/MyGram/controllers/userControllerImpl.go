@@ -143,14 +143,14 @@ func (handler *userHandler) Login(c *gin.Context) {
 // @Accept x-www-form-urlencoded
 // @Produce json
 // @Produce x-www-form-urlencoded
-// @Param requestRegister body model.User true "Register user"
+// @Param requestRegister body model.RequestUserRegister true "Register user"
 // @Success 201 {object} model.ResponseErrorGeneral
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Router /users/register [post]
 func (handler *userHandler) Register(c *gin.Context) {
 	contentType := helpers.GetContentType(c)
 	_ = contentType
-	User := model.User{}
+	User := model.RequestUserRegister{}
 
 	// bind username, email, password, age
 	var err error

@@ -33,8 +33,8 @@ func NewSocialMediaHandler(socialMediaService services.SocialMediaService, valid
 // @Tags Social Media
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Success 200 {array} model.SocialMedia
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /socialmedia [get]
@@ -61,8 +61,8 @@ func (handler *socialMediaHandler) GetAllSocialMedia(c *gin.Context) {
 // @Tags Social Media
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param socialMediaId path int true "Social Media ID"
 // @Success 200 {object} model.SocialMedia
 // @Failure 400 {object} model.ResponseErrorGeneral
@@ -103,8 +103,8 @@ func (handler *socialMediaHandler) GetSocialMedia(c *gin.Context) {
 // @Accept x-www-form-urlencoded
 // @Produce json
 // @Produce x-www-form-urlencoded
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param requestCreate body model.RequestSocialMedia true "Create Social Media user"
 // @Success 201 {object} model.SocialMedia
 // @Failure 400 {object} model.ResponseErrorGeneral
@@ -148,7 +148,7 @@ func (handler *socialMediaHandler) CreateSocialMedia(c *gin.Context) {
 			return
 		}
 	}
-	
+
 	// if contentType == appJson {
 	// 	if err := c.ShouldBindJSON(&socialMedia); err != nil {
 	// 		if errors, ok := err.(validator.ValidationErrors); ok {
@@ -210,8 +210,8 @@ func (handler *socialMediaHandler) CreateSocialMedia(c *gin.Context) {
 // @Accept x-www-form-urlencoded
 // @Produce json
 // @Produce x-www-form-urlencoded
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param socialMediaId path int true "Social Media ID"
 // @Param requestUpdate body model.RequestSocialMedia true "Update Social Media user"
 // @Success 200 {object} model.SocialMedia
@@ -325,8 +325,8 @@ func (handler *socialMediaHandler) UpdateSocialMedia(c *gin.Context) {
 // @Tags Social Media
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param socialMediaId path int true "Social Media ID"
 // @Success 200 {object} model.ResponseDeleted
 // @Failure 400 {object} model.ResponseErrorGeneral

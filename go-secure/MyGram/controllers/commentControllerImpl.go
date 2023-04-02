@@ -33,8 +33,8 @@ func NewCommentHandler(commentService services.CommentService, validator validat
 // @Tags Comment
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Success 200 {array} model.Comment
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
@@ -119,8 +119,8 @@ func (handler *commentHandler) GetAllComment(c *gin.Context) {
 // @Tags Comment
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param commentId path int true "Comment ID"
 // @Success 200 {object} model.Comment
 // @Failure 400 {object} model.ResponseErrorGeneral
@@ -217,8 +217,8 @@ func (handler *commentHandler) GetComment(c *gin.Context) {
 // @Accept x-www-form-urlencoded
 // @Produce json
 // @Produce x-www-form-urlencoded
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param requestCreate body model.RequestComment true "Create Comment photo"
 // @Success 201 {object} model.Comment
 // @Failure 400 {object} model.ResponseErrorGeneral
@@ -264,7 +264,6 @@ func (handler *commentHandler) CreateComment(c *gin.Context) {
 			return
 		}
 	}
-
 
 	// if contentType == appJson {
 	// 	if err := c.ShouldBindJSON(&comment); err != nil {
@@ -334,8 +333,8 @@ func (handler *commentHandler) CreateComment(c *gin.Context) {
 // @Accept x-www-form-urlencoded
 // @Produce json
 // @Produce x-www-form-urlencoded
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param commentId path int true "Comment ID"
 // @Param requestUpdate body model.RequestComment true "Update Comment by photo id user"
 // @Success 200 {object} model.Comment
@@ -391,7 +390,6 @@ func (handler *commentHandler) UpdateComment(c *gin.Context) {
 			return
 		}
 	}
-
 
 	// if contentType == appJson {
 	// 	if err := c.ShouldBindJSON(&comment); err != nil {
@@ -459,8 +457,8 @@ func (handler *commentHandler) UpdateComment(c *gin.Context) {
 // @Tags Comment
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param commentId path int true "Comment ID"
 // @Success 200 {object} model.ResponseDeleted
 // @Failure 400 {object} model.ResponseErrorGeneral

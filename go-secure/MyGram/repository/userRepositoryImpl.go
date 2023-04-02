@@ -33,7 +33,7 @@ func (repo *userRepository) Login(ctx context.Context, tx *gorm.DB, email, pass 
 	}
 }
 
-func (repo *userRepository) Register(ctx context.Context, tx *gorm.DB, user model.User) (model.User, error) {
+func (repo *userRepository) Register(ctx context.Context, tx *gorm.DB, user model.RequestUserRegister) (model.User, error) {
 	User := model.User{}
 	if err := tx.WithContext(ctx).Where("email = ?", user.Email).Take(&User).Error; err == nil {
 		log.Fatalln("Email Already Exists")
@@ -47,7 +47,7 @@ func (repo *userRepository) Register(ctx context.Context, tx *gorm.DB, user mode
 	}
 
 	if err := tx.WithContext(ctx).Create(&newUser).Error; err != nil {
-		return user, fmt.Errorf("failed to register user with email %s: %w", user.Email, err)
+		return User, fmt.Errorf("failed to register user with email %s: %w", user.Email, err)
 	}
 
 	return newUser, nil

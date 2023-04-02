@@ -33,8 +33,8 @@ func NewPhotoHandler(photoService services.PhotoService, validator_ validator.Va
 // @Tags Photo
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Success 200 {array} model.Photo
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /photo [get]
@@ -61,8 +61,8 @@ func (handler *photoHandler) GetAllPhoto(c *gin.Context) {
 // @Tags Photo
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param photoId path int true "Photo ID"
 // @Success 200 {object} model.Photo
 // @Failure 400 {object} model.ResponseErrorGeneral
@@ -104,8 +104,8 @@ func (handler *photoHandler) GetPhoto(c *gin.Context) {
 // @Accept x-www-form-urlencoded
 // @Produce json
 // @Produce x-www-form-urlencoded
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param requestCreate body model.RequestPhoto true "Create Photo user"
 // @Success 201 {object} model.Photo
 // @Failure 400 {object} model.ResponseErrorGeneral
@@ -216,8 +216,8 @@ func (handler *photoHandler) CreatePhoto(c *gin.Context) {
 // @Accept x-www-form-urlencoded
 // @Produce json
 // @Produce x-www-form-urlencoded
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param photoId path int true "Photo ID"
 // @Param requestUpdate body model.RequestPhoto true "Update Photo user"
 // @Success 200 {object} model.Photo
@@ -336,8 +336,8 @@ func (handler *photoHandler) UpdatePhoto(c *gin.Context) {
 // @Tags Photo
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param photoId path int true "Photo ID"
 // @Success 200 {object} model.ResponseDeleted
 // @Failure 400 {object} model.ResponseErrorGeneral

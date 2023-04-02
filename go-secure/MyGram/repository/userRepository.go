@@ -9,5 +9,5 @@ import (
 
 type UserRepository interface {
 	Login(ctx context.Context, tx *gorm.DB, email, pass string) (model.User, error)
-	Register(ctx context.Context, tx *gorm.DB, user model.User) (model.User, error)
+	Register(ctx context.Context, tx *gorm.DB, user model.RequestUserRegister) (model.User, error)
 }
