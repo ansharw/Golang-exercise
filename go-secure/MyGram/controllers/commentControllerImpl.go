@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -35,6 +36,7 @@ func NewCommentHandler(commentService services.CommentService, validator validat
 // @Produce json
 // @Security JWT
 // @securityDefinitions.apikey JWT
+// @Param requestGet body model.RequestGetComment true "Get All Comment By photo id"
 // @Success 200 {array} model.Comment
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
@@ -43,7 +45,7 @@ func (handler *commentHandler) GetAllComment(c *gin.Context) {
 	// userData := c.MustGet("userData").(jwt.MapClaims)
 	// userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.Comment{}
+	comment := model.RequestGetComment{}
 
 	// bind photo_id
 	var err error
@@ -52,52 +54,75 @@ func (handler *commentHandler) GetAllComment(c *gin.Context) {
 	} else {
 		err = c.ShouldBind(&comment)
 	}
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
-	}
 
-	if err := handler.validate.Struct(comment); err != nil {
-		if errors, ok := err.(validator.ValidationErrors); ok {
-			var errMsg string
-			for _, e := range errors {
-				switch e.Field() {
-				case "Message":
-					errMsg = "Invalid title."
-				case "Caption":
-					errMsg = "Invalid caption."
-				case "PhotoID":
-					errMsg = "Invalid photo_id."
-				}
-			}
-			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-				Status:  "Bad Request json",
-				Message: errMsg,
-			})
-			return
-		}
-	}
-
-	// if contentType == appJson {
-	// 	if err := c.ShouldBindJSON(&comment); err != nil {
+	// ----------------------- validation version 1
+	// if err != nil {
+	// 	if errors, ok := err.(validator.ValidationErrors); ok {
+	// 		var errMsg string
+	// 		for _, e := range errors {
+	// 			switch {
+	// 			case e.Field() == "PhotoID":
+	// 				if e.Tag() == "required" {
+	// 					field, _ := reflect.TypeOf(comment).FieldByName("PhotoID")
+	// 					errMsg = fmt.Sprintf("%s is required.", field.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "photo_id cannot be empty"
+	// 				}
+	// 			}
+	// 		}
 	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 			Status:  "Bad Request",
-	// 			Message: err.Error(),
+	// 			Status:  "Bad Request json/form",
+	// 			Message: errMsg,
 	// 		})
 	// 		return
-	// 	}
-	// } else {
-	// 	if err := c.ShouldBind(&comment); err != nil {
+	// 	} else {
+	// 		// all error json / form
 	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 			Status:  "Bad Request",
+	// 			Status:  "Bad Request json/form",
 	// 			Message: err.Error(),
 	// 		})
 	// 		return
 	// 	}
 	// }
+
+	// ----------------------- validation version 2
+	if err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Convert validation errors to map of error messages
+			errorsMap := make(map[string]string)
+			for _, validationError := range validationErrors {
+				// Use the field name as the error key
+				field := validationError.Field()
+				// validation error tag
+				switch validationError.Tag() {
+				case "required":
+					switch field {
+					case "PhotoID":
+						errorsMap[field] = fmt.Sprintf("%s is required", field)
+					}
+				}
+			}
+			// Join error messages into a single string
+			var errorMessages []string
+			for _, errorMessage := range errorsMap {
+				errorMessages = append(errorMessages, errorMessage)
+			}
+			errorMessageString := strings.Join(errorMessages, ", ")
+
+			// Return errors map as JSON response
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request json/form",
+				"message": errorMessageString,
+			})
+			return
+		}
+		// Error json unmarshal / error binding json/form
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request json/form",
+			"message": err.Error(),
+		})
+		return
+	}
 
 	res, err := handler.commentService.FindAllByPhotoId(c, comment.PhotoID)
 	if err != nil {
@@ -122,15 +147,16 @@ func (handler *commentHandler) GetAllComment(c *gin.Context) {
 // @Security JWT
 // @securityDefinitions.apikey JWT
 // @Param commentId path int true "Comment ID"
+// @Param requestGet body model.RequestGetComment true "Get Comment By photo id and comment id in path params"
 // @Success 200 {object} model.Comment
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Failure 404 {object} model.ResponseErrorGeneral
-// @Router /comment/{photoId} [get]
+// @Router /comment/{commentId} [get]
 func (handler *commentHandler) GetComment(c *gin.Context) {
 	// userData := c.MustGet("userData").(jwt.MapClaims)
 	// userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.Comment{}
+	comment := model.RequestGetComment{}
 
 	// Get param commentId
 	commentId, err := strconv.Atoi(c.Param("commentId"))
@@ -148,63 +174,85 @@ func (handler *commentHandler) GetComment(c *gin.Context) {
 	} else {
 		err = c.ShouldBind(&comment)
 	}
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
-			"message": err.Error(),
-		})
-		return
-	}
 
-	if err := handler.validate.Struct(comment); err != nil {
-		if errors, ok := err.(validator.ValidationErrors); ok {
-			var errMsg string
-			for _, e := range errors {
-				switch e.Field() {
-				case "Message":
-					errMsg = "Invalid title."
-				case "Caption":
-					errMsg = "Invalid caption."
-				case "PhotoID":
-					errMsg = "Invalid photo_id."
-				}
-			}
-			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-				Status:  "Bad Request json",
-				Message: errMsg,
-			})
-			return
-		}
-	}
-
-	// if contentType == appJson {
-	// 	if err := c.ShouldBindJSON(&comment); err != nil {
+	// ----------------------- validation version 1
+	// if err != nil {
+	// 	if errors, ok := err.(validator.ValidationErrors); ok {
+	// 		var errMsg string
+	// 		for _, e := range errors {
+	// 			switch {
+	// 			case e.Field() == "PhotoID":
+	// 				if e.Tag() == "required" {
+	// 					field, _ := reflect.TypeOf(comment).FieldByName("PhotoID")
+	// 					errMsg = fmt.Sprintf("%s is required.", field.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "photo_id cannot be empty"
+	// 				}
+	// 			}
+	// 		}
 	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 			Status:  "Bad Request",
-	// 			Message: err.Error(),
+	// 			Status:  "Bad Request json/form",
+	// 			Message: errMsg,
 	// 		})
 	// 		return
-	// 	}
-	// } else {
-	// 	if err := c.ShouldBind(&comment); err != nil {
+	// 	} else {
+	// 		// all error json / form
 	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 			Status:  "Bad Request",
+	// 			Status:  "Bad Request json/form",
 	// 			Message: err.Error(),
 	// 		})
 	// 		return
 	// 	}
 	// }
 
-	res, err := handler.commentService.FindByPhotoId(c, comment.PhotoID, uint(commentId))
+	// ----------------------- validation version 2
 	if err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Convert validation errors to map of error messages
+			errorsMap := make(map[string]string)
+			for _, validationError := range validationErrors {
+				// Use the field name as the error key
+				field := validationError.Field()
+				// validation error tag
+				switch validationError.Tag() {
+				case "required":
+					switch field {
+					case "PhotoID":
+						errorsMap[field] = fmt.Sprintf("%s is required", field)
+					}
+				}
+			}
+			// Join error messages into a single string
+			var errorMessages []string
+			for _, errorMessage := range errorsMap {
+				errorMessages = append(errorMessages, errorMessage)
+			}
+			errorMessageString := strings.Join(errorMessages, ", ")
+
+			// Return errors map as JSON response
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request json/form",
+				"message": errorMessageString,
+			})
+			return
+		}
+		// Error json unmarshal / error binding json/form
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request json/form",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if res, err := handler.commentService.FindByPhotoId(c, comment.PhotoID, uint(commentId)); err != nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, model.ResponseErrorGeneral{
 			Status:  "Data Not Found",
 			Message: fmt.Sprintf("Comment Data with id: %d not found\n", commentId),
 		})
 		return
+	} else {
+		c.JSON(http.StatusOK, res)
 	}
-
-	c.JSON(http.StatusOK, res)
 }
 
 // Create comment by photo id and user id
@@ -229,89 +277,95 @@ func (handler *commentHandler) CreateComment(c *gin.Context) {
 	contentType := helpers.GetContentType(c)
 	comment := model.RequestComment{}
 
-	// bind messange, photo_id
+	// bind message, photo_id
 	var err error
 	if contentType == appJson {
 		err = c.ShouldBindJSON(&comment)
 	} else {
 		err = c.ShouldBind(&comment)
 	}
+
+	// ----------------------- validation version 1
+	// if err != nil {
+	// 	if errors, ok := err.(validator.ValidationErrors); ok {
+	// 		var errMsg string
+	// 		for _, e := range errors {
+	// 			switch {
+	// 			case e.Field() == "PhotoID":
+	// 				if e.Tag() == "required" {
+	// 					field, _ := reflect.TypeOf(comment).FieldByName("PhotoID")
+	// 					errMsg = fmt.Sprintf("%s is required.", field.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "photo_id cannot be empty"
+	// 				}
+	// 			case e.Field() == "Message":
+	// 				if e.Tag() == "required" {
+	// 					field_message, _ := reflect.TypeOf(comment).FieldByName("Message")
+	// 					errMsg = fmt.Sprintf("%s is required.", field_message.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "message cannot be empty"
+	// 				}
+	// 			default:
+	// 				if e.Tag() == "required" {
+	// 					field_message, _ := reflect.TypeOf(comment).FieldByName("Message")
+	// 					field_photo_id, _ := reflect.TypeOf(comment).FieldByName("PhotoID")
+	// 					errMsg = fmt.Sprintf("%s and %s is required.", field_message.Tag.Get("json"), field_photo_id.Tag.Get("json"))
+	// 				}
+	// 			}
+	// 		}
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: errMsg,
+	// 		})
+	// 		return
+	// 	} else {
+	// 		// all error json / form
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: err.Error(),
+	// 		})
+	// 		return
+	// 	}
+	// }
+
+	// ----------------------- validation version 2
 	if err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Convert validation errors to map of error messages
+			errorsMap := make(map[string]string)
+			for _, validationError := range validationErrors {
+				// Use the field name as the error key
+				field := validationError.Field()
+				// validation error tag
+				switch validationError.Tag() {
+				case "required":
+					switch field {
+					case "PhotoID", "Message":
+						errorsMap[field] = fmt.Sprintf("%s is required", field)
+					}
+				}
+			}
+			// Join error messages into a single string
+			var errorMessages []string
+			for _, errorMessage := range errorsMap {
+				errorMessages = append(errorMessages, errorMessage)
+			}
+			errorMessageString := strings.Join(errorMessages, ", ")
+
+			// Return errors map as JSON response
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request json/form",
+				"message": errorMessageString,
+			})
+			return
+		}
+		// Error json unmarshal / error binding json/form
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
+			"error":   "Bad Request json/form",
 			"message": err.Error(),
 		})
 		return
 	}
-
-	if err := handler.validate.Struct(comment); err != nil {
-		if errors, ok := err.(validator.ValidationErrors); ok {
-			var errMsg string
-			for _, e := range errors {
-				switch e.Field() {
-				case "Message":
-					errMsg = "Invalid title."
-				case "Caption":
-					errMsg = "Invalid caption."
-				case "PhotoID":
-					errMsg = "Invalid photo_id."
-				}
-			}
-			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-				Status:  "Bad Request json",
-				Message: errMsg,
-			})
-			return
-		}
-	}
-
-	// if contentType == appJson {
-	// 	if err := c.ShouldBindJSON(&comment); err != nil {
-	// 		if err := handler.validate.Struct(comment); err != nil {
-	// 			if errors, ok := err.(validator.ValidationErrors); ok {
-	// 				var errMsg string
-	// 				for _, e := range errors {
-	// 					switch e.Field() {
-	// 					case "Message":
-	// 						errMsg = "Invalid title."
-	// 					case "Caption":
-	// 						errMsg = "Invalid caption."
-	// 					case "PhotoID":
-	// 						errMsg = "Invalid photo_id."
-	// 					}
-	// 				}
-	// 				c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 					Status:  "Bad Request json",
-	// 					Message: errMsg,
-	// 				})
-	// 				return
-	// 			}
-	// 		}
-	// 	}
-	// } else {
-	// 	if err := c.ShouldBind(&comment); err != nil {
-	// 		if err := handler.validate.Struct(comment); err != nil {
-	// 			if errors, ok := err.(validator.ValidationErrors); ok {
-	// 				var errMsg string
-	// 				for _, e := range errors {
-	// 					switch e.Field() {
-	// 					case "Message":
-	// 						errMsg = "Invalid title."
-	// 					case "Caption":
-	// 						errMsg = "Invalid caption."
-	// 					case "PhotoID":
-	// 						errMsg = "Invalid photo_id."
-	// 					}
-	// 				}
-	// 				c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 					Status:  "Bad Request form",
-	// 					Message: errMsg,
-	// 				})
-	// 				return
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	if res, err := handler.commentService.Create(c, comment, userID, comment.PhotoID); err != nil {
 		c.JSON(http.StatusBadRequest, model.ResponseErrorGeneral{
@@ -362,82 +416,88 @@ func (handler *commentHandler) UpdateComment(c *gin.Context) {
 	} else {
 		err = c.ShouldBind(&comment)
 	}
+
+	// ----------------------- validation version 1
+	// if err != nil {
+	// 	if errors, ok := err.(validator.ValidationErrors); ok {
+	// 		var errMsg string
+	// 		for _, e := range errors {
+	// 			switch {
+	// 			case e.Field() == "PhotoID":
+	// 				if e.Tag() == "required" {
+	// 					field, _ := reflect.TypeOf(comment).FieldByName("PhotoID")
+	// 					errMsg = fmt.Sprintf("%s is required.", field.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "photo_id cannot be empty"
+	// 				}
+	// 			case e.Field() == "Message":
+	// 				if e.Tag() == "required" {
+	// 					field_message, _ := reflect.TypeOf(comment).FieldByName("Message")
+	// 					errMsg = fmt.Sprintf("%s is required.", field_message.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "message cannot be empty"
+	// 				}
+	// 			default:
+	// 				if e.Tag() == "required" {
+	// 					field_message, _ := reflect.TypeOf(comment).FieldByName("Message")
+	// 					field_photo_id, _ := reflect.TypeOf(comment).FieldByName("PhotoID")
+	// 					errMsg = fmt.Sprintf("%s and %s is required.", field_message.Tag.Get("json"), field_photo_id.Tag.Get("json"))
+	// 				}
+	// 			}
+	// 		}
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: errMsg,
+	// 		})
+	// 		return
+	// 	} else {
+	// 		// all error json / form
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: err.Error(),
+	// 		})
+	// 		return
+	// 	}
+	// }
+
+	// ----------------------- validation version 2
 	if err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Convert validation errors to map of error messages
+			errorsMap := make(map[string]string)
+			for _, validationError := range validationErrors {
+				// Use the field name as the error key
+				field := validationError.Field()
+				// validation error tag
+				switch validationError.Tag() {
+				case "required":
+					switch field {
+					case "PhotoID", "Message":
+						errorsMap[field] = fmt.Sprintf("%s is required", field)
+					}
+				}
+			}
+			// Join error messages into a single string
+			var errorMessages []string
+			for _, errorMessage := range errorsMap {
+				errorMessages = append(errorMessages, errorMessage)
+			}
+			errorMessageString := strings.Join(errorMessages, ", ")
+
+			// Return errors map as JSON response
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request json/form",
+				"message": errorMessageString,
+			})
+			return
+		}
+		// Error json unmarshal / error binding json/form
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
+			"error":   "Bad Request json/form",
 			"message": err.Error(),
 		})
 		return
 	}
-
-	if err := handler.validate.Struct(comment); err != nil {
-		if errors, ok := err.(validator.ValidationErrors); ok {
-			var errMsg string
-			for _, e := range errors {
-				switch e.Field() {
-				case "Message":
-					errMsg = "Invalid title."
-				case "Caption":
-					errMsg = "Invalid caption."
-				case "PhotoID":
-					errMsg = "Invalid photo_id."
-				}
-			}
-			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-				Status:  "Bad Request json",
-				Message: errMsg,
-			})
-			return
-		}
-	}
-
-	// if contentType == appJson {
-	// 	if err := c.ShouldBindJSON(&comment); err != nil {
-	// 		if err := handler.validate.Struct(comment); err != nil {
-	// 			if errors, ok := err.(validator.ValidationErrors); ok {
-	// 				var errMsg string
-	// 				for _, e := range errors {
-	// 					switch e.Field() {
-	// 					case "Message":
-	// 						errMsg = "Invalid title."
-	// 					case "Caption":
-	// 						errMsg = "Invalid caption."
-	// 					case "PhotoID":
-	// 						errMsg = "Invalid photo_id."
-	// 					}
-	// 				}
-	// 				c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 					Status:  "Bad Request json",
-	// 					Message: errMsg,
-	// 				})
-	// 				return
-	// 			}
-	// 		}
-	// 	}
-	// } else {
-	// 	if err := c.ShouldBind(&comment); err != nil {
-	// 		if err := handler.validate.Struct(comment); err != nil {
-	// 			if errors, ok := err.(validator.ValidationErrors); ok {
-	// 				var errMsg string
-	// 				for _, e := range errors {
-	// 					switch e.Field() {
-	// 					case "Message":
-	// 						errMsg = "Invalid title."
-	// 					case "Caption":
-	// 						errMsg = "Invalid caption."
-	// 					case "PhotoID":
-	// 						errMsg = "Invalid photo_id."
-	// 					}
-	// 				}
-	// 				c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 					Status:  "Bad Request form",
-	// 					Message: errMsg,
-	// 				})
-	// 				return
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	if res, err := handler.commentService.Update(c, comment, uint(commentId), userID, comment.PhotoID); err != nil {
 		c.JSON(http.StatusBadRequest, model.ResponseErrorGeneral{
@@ -486,74 +546,75 @@ func (handler *commentHandler) DeleteComment(c *gin.Context) {
 	} else {
 		err = c.ShouldBind(&comment)
 	}
+
+	// ----------------------- validation version 1
+	// if err != nil {
+	// 	if errors, ok := err.(validator.ValidationErrors); ok {
+	// 		var errMsg string
+	// 		for _, e := range errors {
+	// 			switch {
+	// 			case e.Field() == "PhotoID":
+	// 				if e.Tag() == "required" {
+	// 					field, _ := reflect.TypeOf(comment).FieldByName("PhotoID")
+	// 					errMsg = fmt.Sprintf("%s is required.", field.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "photo_id cannot be empty"
+	// 				}
+	// 			}
+	// 		}
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: errMsg,
+	// 		})
+	// 		return
+	// 	} else {
+	// 		// all error json / form
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: err.Error(),
+	// 		})
+	// 		return
+	// 	}
+	// }
+
+	// ----------------------- validation version 2
 	if err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Convert validation errors to map of error messages
+			errorsMap := make(map[string]string)
+			for _, validationError := range validationErrors {
+				// Use the field name as the error key
+				field := validationError.Field()
+				// validation error tag
+				switch validationError.Tag() {
+				case "required":
+					switch field {
+					case "PhotoID":
+						errorsMap[field] = fmt.Sprintf("%s is required", field)
+					}
+				}
+			}
+			// Join error messages into a single string
+			var errorMessages []string
+			for _, errorMessage := range errorsMap {
+				errorMessages = append(errorMessages, errorMessage)
+			}
+			errorMessageString := strings.Join(errorMessages, ", ")
+
+			// Return errors map as JSON response
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request json/form",
+				"message": errorMessageString,
+			})
+			return
+		}
+		// Error json unmarshal / error binding json/form
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
+			"error":   "Bad Request json/form",
 			"message": err.Error(),
 		})
 		return
 	}
-
-	if err := handler.validate.Struct(comment); err != nil {
-		if errors, ok := err.(validator.ValidationErrors); ok {
-			var errMsg string
-			for _, e := range errors {
-				switch e.Field() {
-				case "Message":
-					errMsg = "Invalid title."
-				case "Caption":
-					errMsg = "Invalid caption."
-				case "PhotoID":
-					errMsg = "Invalid photo_id."
-				}
-			}
-			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-				Status:  "Bad Request json",
-				Message: errMsg,
-			})
-			return
-		}
-	}
-
-	// if contentType == appJson {
-	// 	if err := c.ShouldBindJSON(&comment); err != nil {
-	// 		if err := handler.validate.Struct(comment); err != nil {
-	// 			if errors, ok := err.(validator.ValidationErrors); ok {
-	// 				var errMsg string
-	// 				for _, e := range errors {
-	// 					switch e.Field() {
-	// 					case "PhotoID":
-	// 						errMsg = "Invalid photo_id."
-	// 					}
-	// 				}
-	// 				c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 					Status:  "Bad Request json",
-	// 					Message: errMsg,
-	// 				})
-	// 				return
-	// 			}
-	// 		}
-	// 	}
-	// } else {
-	// 	if err := c.ShouldBind(&comment); err != nil {
-	// 		if err := handler.validate.Struct(comment); err != nil {
-	// 			if errors, ok := err.(validator.ValidationErrors); ok {
-	// 				var errMsg string
-	// 				for _, e := range errors {
-	// 					switch e.Field() {
-	// 					case "PhotoID":
-	// 						errMsg = "Invalid photo_id."
-	// 					}
-	// 				}
-	// 				c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 					Status:  "Bad Request form",
-	// 					Message: errMsg,
-	// 				})
-	// 				return
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	if _, err := handler.commentService.Delete(c, uint(commentId), userID, comment.PhotoID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ResponseErrorGeneral{

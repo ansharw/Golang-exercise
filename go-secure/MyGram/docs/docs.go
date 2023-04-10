@@ -36,6 +36,17 @@ const docTemplate = `{
                     "Comment"
                 ],
                 "summary": "Get all comment by photo id user",
+                "parameters": [
+                    {
+                        "description": "Get All Comment By photo id",
+                        "name": "requestGet",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestGetComment"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -107,6 +118,62 @@ const docTemplate = `{
             }
         },
         "/comment/{commentId}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get comment by photo id user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Get comment by photo id user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Comment ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Get Comment By photo id and comment id in path params",
+                        "name": "requestGet",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestGetComment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
@@ -200,55 +267,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.ResponseErrorGeneral"
-                        }
-                    }
-                }
-            }
-        },
-        "/comment/{photoId}": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Get comment by photo id user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Comment"
-                ],
-                "summary": "Get comment by photo id user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Comment ID",
-                        "name": "commentId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Comment"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.ResponseErrorGeneral"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
@@ -876,8 +894,16 @@ const docTemplate = `{
                 },
                 "photo_id": {
                     "type": "integer"
-                },
-                "user_id": {
+                }
+            }
+        },
+        "model.RequestGetComment": {
+            "type": "object",
+            "required": [
+                "photo_id"
+            ],
+            "properties": {
+                "photo_id": {
                     "type": "integer"
                 }
             }
@@ -926,8 +952,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string",
-                    "minLength": 6
+                    "type": "string"
                 }
             }
         },
@@ -942,7 +967,6 @@ const docTemplate = `{
             "properties": {
                 "age": {
                     "type": "integer",
-                    "maximum": 130,
                     "minimum": 8
                 },
                 "email": {

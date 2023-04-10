@@ -20,7 +20,6 @@ import (
 // @description    	This is a sample server MyGram server.
 // @contact.name   	ansharw
 // @host      		localhost:8080
-// BasePath 		/
 // @securityDefinitions.apikey JWT
 // @in header
 // @name Authorization

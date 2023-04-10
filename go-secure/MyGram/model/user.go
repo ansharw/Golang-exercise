@@ -2,22 +2,22 @@ package model
 
 type User struct {
 	GormModel
-	Username string `gorm:"not null,unique" json:"username" form:"username" binding:"required" validate:"required"`
-	Email    string `gorm:"not null" json:"email" form:"email" binding:"required" validate:"required,email"`
-	Password string `gorm:"not null" json:"password" form:"password" binding:"required" validate:"required,min=6"`
-	Age      int    `gorm:"not null" json:"age" form:"age" binding:"required" validate:"required,gte=8,lte=130"`
+	Username string `gorm:"not null,unique" json:"username" form:"username" binding:"required,unique"`
+	Email    string `gorm:"not null" json:"email" form:"email" binding:"required,email,unique"`
+	Password string `gorm:"not null" json:"password" form:"password" binding:"required,min=6"`
+	Age      int    `gorm:"not null" json:"age" form:"age" binding:"required,gte=8"`
 }
 
 type RequestUserLogin struct {
-	Email    string `gorm:"-:all" json:"email" form:"email" binding:"required" validate:"required,email"`
-	Password string `gorm:"-:all" json:"password" form:"password" binding:"required" validate:"required,min=6"`
+	Email    string `gorm:"-:all" json:"email" form:"email" binding:"required,email,unique"`
+	Password string `gorm:"-:all" json:"password" form:"password" binding:"required"`
 }
 
 type RequestUserRegister struct {
-	Age      int    `gorm:"-:all" json:"age" form:"age" binding:"required" validate:"required,gte=8,lte=130"`
-	Username string `gorm:"-:all,unique" json:"username" form:"username" binding:"required" validate:"required"`
-	Email    string `gorm:"-:all,unique" json:"email" form:"email" binding:"required" validate:"required,email"`
-	Password string `gorm:"-:all" json:"password" form:"password" binding:"required" validate:"required,min=6"`
+	Age      int    `gorm:"-:all" json:"age" form:"age" binding:"required,gte=8"`
+	Username string `gorm:"-:all,unique" json:"username" form:"username" binding:"required,unique"`
+	Email    string `gorm:"-:all,unique" json:"email" form:"email" binding:"required,email,unique"`
+	Password string `gorm:"-:all" json:"password" form:"password" binding:"required,min=6"`
 }
 
 // response
