@@ -42,10 +42,15 @@ definitions:
         type: string
       photo_id:
         type: integer
-      user_id:
-        type: integer
     required:
     - message
+    - photo_id
+    type: object
+  model.RequestGetComment:
+    properties:
+      photo_id:
+        type: integer
+    required:
     - photo_id
     type: object
   model.RequestPhoto:
@@ -75,11 +80,28 @@ definitions:
       email:
         type: string
       password:
-        minLength: 6
         type: string
     required:
     - email
     - password
+    type: object
+  model.RequestUserRegister:
+    properties:
+      age:
+        minimum: 8
+        type: integer
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      username:
+        type: string
+    required:
+    - age
+    - email
+    - password
+    - username
     type: object
   model.ResponseDeleted:
     properties:
@@ -111,31 +133,6 @@ definitions:
     - name
     - social_media_url
     type: object
-  model.User:
-    properties:
-      age:
-        maximum: 130
-        minimum: 8
-        type: integer
-      created_at:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      password:
-        minLength: 6
-        type: string
-      updated_at:
-        type: string
-      username:
-        type: string
-    required:
-    - age
-    - email
-    - password
-    - username
-    type: object
 host: localhost:8080
 info:
   contact:
@@ -149,6 +146,13 @@ paths:
       consumes:
       - application/json
       description: Get all comment by photo id user
+      parameters:
+      - description: Get All Comment By photo id
+        in: body
+        name: requestGet
+        required: true
+        schema:
+          $ref: '#/definitions/model.RequestGetComment'
       produces:
       - application/json
       responses:
@@ -167,7 +171,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Get all comment by photo id user
       tags:
       - Comment
@@ -196,7 +200,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Create comment photo user
       tags:
       - Comment
@@ -227,8 +231,44 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Delete comment by photo id user
+      tags:
+      - Comment
+    get:
+      consumes:
+      - application/json
+      description: Get comment by photo id user
+      parameters:
+      - description: Comment ID
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      - description: Get Comment By photo id and comment id in path params
+        in: body
+        name: requestGet
+        required: true
+        schema:
+          $ref: '#/definitions/model.RequestGetComment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
+      security:
+      - JWT: []
+      summary: Get comment by photo id user
       tags:
       - Comment
     put:
@@ -261,39 +301,8 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Update comment by photo id user
-      tags:
-      - Comment
-  /comment/{photoId}:
-    get:
-      consumes:
-      - application/json
-      description: Get comment by photo id user
-      parameters:
-      - description: Comment ID
-        in: path
-        name: commentId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Comment'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ResponseErrorGeneral'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/model.ResponseErrorGeneral'
-      security:
-      - token: []
-      summary: Get comment by photo id user
       tags:
       - Comment
   /photo:
@@ -315,7 +324,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Get all photo user
       tags:
       - Photo
@@ -344,7 +353,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Create photo user
       tags:
       - Photo
@@ -375,7 +384,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Delete photo user
       tags:
       - Photo
@@ -405,7 +414,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Get photo user
       tags:
       - Photo
@@ -439,7 +448,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Update photo user
       tags:
       - Photo
@@ -462,7 +471,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Get all social media user
       tags:
       - Social Media
@@ -491,7 +500,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Create social media user
       tags:
       - Social Media
@@ -522,7 +531,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Delete social media user
       tags:
       - Social Media
@@ -552,7 +561,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Get social media user
       tags:
       - Social Media
@@ -586,7 +595,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
-      - token: []
+      - JWT: []
       summary: Update social media user
       tags:
       - Social Media
@@ -634,7 +643,7 @@ paths:
         name: requestRegister
         required: true
         schema:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/model.RequestUserRegister'
       produces:
       - application/json
       - application/x-www-form-urlencoded
@@ -651,9 +660,10 @@ paths:
       tags:
       - User
 securityDefinitions:
-  token:
-    description: token for authentication
+  JWT:
+    description: 'description: Enter the token with the `Bearer: ` prefix, e.g. "Bearer
+      abcde12345".'
     in: header
-    name: Authentication
+    name: Authorization
     type: apiKey
 swagger: "2.0"

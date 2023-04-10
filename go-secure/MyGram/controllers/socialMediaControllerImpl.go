@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -33,8 +34,8 @@ func NewSocialMediaHandler(socialMediaService services.SocialMediaService, valid
 // @Tags Social Media
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Success 200 {array} model.SocialMedia
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /socialmedia [get]
@@ -61,8 +62,8 @@ func (handler *socialMediaHandler) GetAllSocialMedia(c *gin.Context) {
 // @Tags Social Media
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param socialMediaId path int true "Social Media ID"
 // @Success 200 {object} model.SocialMedia
 // @Failure 400 {object} model.ResponseErrorGeneral
@@ -103,8 +104,8 @@ func (handler *socialMediaHandler) GetSocialMedia(c *gin.Context) {
 // @Accept x-www-form-urlencoded
 // @Produce json
 // @Produce x-www-form-urlencoded
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param requestCreate body model.RequestSocialMedia true "Create Social Media user"
 // @Success 201 {object} model.SocialMedia
 // @Failure 400 {object} model.ResponseErrorGeneral
@@ -122,72 +123,102 @@ func (handler *socialMediaHandler) CreateSocialMedia(c *gin.Context) {
 	} else {
 		err = c.ShouldBind(&socialMedia)
 	}
+
+	// ----------------------- validation version 1
+	// if err != nil {
+	// 	if errors, ok := err.(validator.ValidationErrors); ok {
+	// 		var errMsg string
+	// 		for _, e := range errors {
+	// 			switch {
+	// 			case len(errors) == 2:
+	// 				if e.Tag() == "required" {
+	// 					field_name, _ := reflect.TypeOf(socialMedia).FieldByName("Name")
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s and %s is required.", field_name.Tag.Get("json"), field_social_media_url.Tag.Get("json"))
+	// 				} else if e.Tag() == "required" || e.Tag() == "url" {
+	// 					field_name, _ := reflect.TypeOf(socialMedia).FieldByName("Name")
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s is required and %s is invalid url.", field_name.Tag.Get("json"), field_social_media_url.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "name and social_media_url cannot be empty"
+	// 				}
+	// 			case e.Field() == "Name":
+	// 				if e.Tag() == "required" {
+	// 					field, _ := reflect.TypeOf(socialMedia).FieldByName("Name")
+	// 					errMsg = fmt.Sprintf("%s is required.", field.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "Invalid input"
+	// 				}
+	// 			case e.Field() == "SocialMediaURL":
+	// 				if len(errors) == 2 {
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s is required and invalid url.", field_social_media_url.Tag.Get("json"))
+	// 				} else if e.Tag() == "required" {
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s is required.", field_social_media_url.Tag.Get("json"))
+	// 				} else if e.Tag() == "url" {
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s is invalid url.", field_social_media_url.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "Invalid input"
+	// 				}
+	// 			}
+	// 		}
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: errMsg,
+	// 		})
+	// 		return
+	// 	} else {
+	// 		// all error json / form
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: err.Error(),
+	// 		})
+	// 		return
+	// 	}
+	// }
+
+	// ----------------------- validation version 2
 	if err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Convert validation errors to map of error messages
+			errorsMap := make(map[string]string)
+			for _, validationError := range validationErrors {
+				// Use the field name as the error key
+				field := validationError.Field()
+				// validation error tag
+				switch validationError.Tag() {
+				case "url":
+					switch field {
+					case "SocialMediaURL":
+						errorsMap[field] = fmt.Sprintf("%s is invalid url.", field)
+					}
+				default:
+					errorsMap[field] = fmt.Sprintf("%s is required", field)
+				}
+			}
+			// Join error messages into a single string
+			var errorMessages []string
+			for _, errorMessage := range errorsMap {
+				errorMessages = append(errorMessages, errorMessage)
+			}
+			errorMessageString := strings.Join(errorMessages, ", ")
+
+			// Return errors map as JSON response
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request json/form",
+				"message": errorMessageString,
+			})
+			return
+		}
+		// Error json unmarshal / error binding json/form
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
+			"error":   "Bad Request json/form",
 			"message": err.Error(),
 		})
 		return
 	}
-
-	if err := handler.validate.Struct(socialMedia); err != nil {
-		if errors, ok := err.(validator.ValidationErrors); ok {
-			var errMsg string
-			for _, e := range errors {
-				switch e.Field() {
-				case "Name":
-					errMsg = "Invalid name."
-				case "SocialMediaURL":
-					errMsg = "Invalid url."
-				}
-			}
-			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-				Status:  "Bad Request json",
-				Message: errMsg,
-			})
-			return
-		}
-	}
-	
-	// if contentType == appJson {
-	// 	if err := c.ShouldBindJSON(&socialMedia); err != nil {
-	// 		if errors, ok := err.(validator.ValidationErrors); ok {
-	// 			var errMsg string
-	// 			for _, e := range errors {
-	// 				switch e.Field() {
-	// 				case "Name":
-	// 					errMsg = "Invalid name."
-	// 				case "SocialMediaURL":
-	// 					errMsg = "Invalid url."
-	// 				}
-	// 			}
-	// 			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 				Status:  "Bad Request json",
-	// 				Message: errMsg,
-	// 			})
-	// 			return
-	// 		}
-	// 	}
-	// } else {
-	// 	if err := c.ShouldBind(&socialMedia); err != nil {
-	// 		if errors, ok := err.(validator.ValidationErrors); ok {
-	// 			var errMsg string
-	// 			for _, e := range errors {
-	// 				switch e.Field() {
-	// 				case "Name":
-	// 					errMsg = "Invalid name."
-	// 				case "SocialMediaURL":
-	// 					errMsg = "Invalid url."
-	// 				}
-	// 			}
-	// 			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 				Status:  "Bad Request form",
-	// 				Message: errMsg,
-	// 			})
-	// 			return
-	// 		}
-	// 	}
-	// }
 
 	if res, err := handler.socialMediaService.Create(c, socialMedia, userID); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
@@ -210,8 +241,8 @@ func (handler *socialMediaHandler) CreateSocialMedia(c *gin.Context) {
 // @Accept x-www-form-urlencoded
 // @Produce json
 // @Produce x-www-form-urlencoded
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param socialMediaId path int true "Social Media ID"
 // @Param requestUpdate body model.RequestSocialMedia true "Update Social Media user"
 // @Success 200 {object} model.SocialMedia
@@ -227,7 +258,7 @@ func (handler *socialMediaHandler) UpdateSocialMedia(c *gin.Context) {
 	socialMediaId, err := strconv.Atoi(c.Param("socialMediaId"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-			Status:  "Bad Request form",
+			Status:  "Bad Request json/form",
 			Message: "invalid social media ID",
 		})
 		return
@@ -239,72 +270,101 @@ func (handler *socialMediaHandler) UpdateSocialMedia(c *gin.Context) {
 	} else {
 		err = c.ShouldBind(&socialMedia)
 	}
+	// ----------------------- validation version 1
+	// if err != nil {
+	// 	if errors, ok := err.(validator.ValidationErrors); ok {
+	// 		var errMsg string
+	// 		for _, e := range errors {
+	// 			switch {
+	// 			case len(errors) == 2:
+	// 				if e.Tag() == "required" {
+	// 					field_name, _ := reflect.TypeOf(socialMedia).FieldByName("Name")
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s and %s is required.", field_name.Tag.Get("json"), field_social_media_url.Tag.Get("json"))
+	// 				} else if e.Tag() == "required" || e.Tag() == "url" {
+	// 					field_name, _ := reflect.TypeOf(socialMedia).FieldByName("Name")
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s is required and %s is invalid url.", field_name.Tag.Get("json"), field_social_media_url.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "name and social_media_url cannot be empty"
+	// 				}
+	// 			case e.Field() == "Name":
+	// 				if e.Tag() == "required" {
+	// 					field, _ := reflect.TypeOf(socialMedia).FieldByName("Name")
+	// 					errMsg = fmt.Sprintf("%s is required.", field.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "Invalid input"
+	// 				}
+	// 			case e.Field() == "SocialMediaURL":
+	// 				if len(errors) == 2 {
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s is required and invalid url.", field_social_media_url.Tag.Get("json"))
+	// 				} else if e.Tag() == "required" {
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s is required.", field_social_media_url.Tag.Get("json"))
+	// 				} else if e.Tag() == "url" {
+	// 					field_social_media_url, _ := reflect.TypeOf(socialMedia).FieldByName("SocialMediaURL")
+	// 					errMsg = fmt.Sprintf("%s is invalid url.", field_social_media_url.Tag.Get("json"))
+	// 				} else {
+	// 					errMsg = "Invalid input"
+	// 				}
+	// 			}
+	// 		}
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: errMsg,
+	// 		})
+	// 		return
+	// 	} else {
+	// 		// all error json / form
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+	// 			Status:  "Bad Request json/form",
+	// 			Message: err.Error(),
+	// 		})
+	// 		return
+	// 	}
+	// }
+
+	// ----------------------- validation version 2
 	if err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Convert validation errors to map of error messages
+			errorsMap := make(map[string]string)
+			for _, validationError := range validationErrors {
+				// Use the field name as the error key
+				field := validationError.Field()
+				// validation error tag
+				switch validationError.Tag() {
+				case "url":
+					switch field {
+					case "SocialMediaURL":
+						errorsMap[field] = fmt.Sprintf("%s is invalid url.", field)
+					}
+				default:
+					errorsMap[field] = fmt.Sprintf("%s is required", field)
+				}
+			}
+			// Join error messages into a single string
+			var errorMessages []string
+			for _, errorMessage := range errorsMap {
+				errorMessages = append(errorMessages, errorMessage)
+			}
+			errorMessageString := strings.Join(errorMessages, ", ")
+
+			// Return errors map as JSON response
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error":   "Bad Request json/form",
+				"message": errorMessageString,
+			})
+			return
+		}
+		// Error json unmarshal / error binding json/form
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Bad Request",
+			"error":   "Bad Request json/form",
 			"message": err.Error(),
 		})
 		return
 	}
-
-	if err := handler.validate.Struct(socialMedia); err != nil {
-		if errors, ok := err.(validator.ValidationErrors); ok {
-			var errMsg string
-			for _, e := range errors {
-				switch e.Field() {
-				case "Name":
-					errMsg = "Invalid name."
-				case "SocialMediaURL":
-					errMsg = "Invalid url."
-				}
-			}
-			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-				Status:  "Bad Request json/form",
-				Message: errMsg,
-			})
-			return
-		}
-	}
-
-	// if contentType == appJson {
-	// 	if err := c.ShouldBindJSON(&socialMedia); err != nil {
-	// 		if errors, ok := err.(validator.ValidationErrors); ok {
-	// 			var errMsg string
-	// 			for _, e := range errors {
-	// 				switch e.Field() {
-	// 				case "Name":
-	// 					errMsg = "Invalid name."
-	// 				case "SocialMediaURL":
-	// 					errMsg = "Invalid url."
-	// 				}
-	// 			}
-	// 			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 				Status:  "Bad Request json",
-	// 				Message: errMsg,
-	// 			})
-	// 			return
-	// 		}
-	// 	}
-	// } else {
-	// 	if err := c.ShouldBind(&socialMedia); err != nil {
-	// 		if errors, ok := err.(validator.ValidationErrors); ok {
-	// 			var errMsg string
-	// 			for _, e := range errors {
-	// 				switch e.Field() {
-	// 				case "Name":
-	// 					errMsg = "Invalid name."
-	// 				case "SocialMediaURL":
-	// 					errMsg = "Invalid url."
-	// 				}
-	// 			}
-	// 			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-	// 				Status:  "Bad Request form",
-	// 				Message: errMsg,
-	// 			})
-	// 			return
-	// 		}
-	// 	}
-	// }
 
 	if res, err := handler.socialMediaService.Update(c, socialMedia, uint(socialMediaId), userID); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
@@ -325,8 +385,8 @@ func (handler *socialMediaHandler) UpdateSocialMedia(c *gin.Context) {
 // @Tags Social Media
 // @Accept json
 // @Produce json
-// @Security token
-// @securityDefinitions.apikey token
+// @Security JWT
+// @securityDefinitions.apikey JWT
 // @Param socialMediaId path int true "Social Media ID"
 // @Success 200 {object} model.ResponseDeleted
 // @Failure 400 {object} model.ResponseErrorGeneral

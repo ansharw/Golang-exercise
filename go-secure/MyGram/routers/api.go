@@ -20,11 +20,10 @@ import (
 // @description    	This is a sample server MyGram server.
 // @contact.name   	ansharw
 // @host      		localhost:8080
-// BasePath 		/
-// @securityDefinitions.apikey token
+// @securityDefinitions.apikey JWT
 // @in header
-// @name Authentication
-// @description token for authentication 
+// @name Authorization
+// @description description: Enter the token with the `Bearer: ` prefix, e.g. "Bearer abcde12345".
 // @externalDocs.description  OpenAPI
 func StartApp() *gin.Engine {
 	r := gin.Default()

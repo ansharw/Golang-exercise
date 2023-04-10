@@ -22,7 +22,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Get all comment by photo id user",
@@ -36,6 +36,17 @@ const docTemplate = `{
                     "Comment"
                 ],
                 "summary": "Get all comment by photo id user",
+                "parameters": [
+                    {
+                        "description": "Get All Comment By photo id",
+                        "name": "requestGet",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestGetComment"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -63,7 +74,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Create comment photo user",
@@ -107,10 +118,66 @@ const docTemplate = `{
             }
         },
         "/comment/{commentId}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get comment by photo id user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Get comment by photo id user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Comment ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Get Comment By photo id and comment id in path params",
+                        "name": "requestGet",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestGetComment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Update comment by photo id user",
@@ -162,7 +229,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Delete comment by photo id user",
@@ -207,60 +274,11 @@ const docTemplate = `{
                 }
             }
         },
-        "/comment/{photoId}": {
-            "get": {
-                "security": [
-                    {
-                        "token": []
-                    }
-                ],
-                "description": "Get comment by photo id user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Comment"
-                ],
-                "summary": "Get comment by photo id user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Comment ID",
-                        "name": "commentId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Comment"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.ResponseErrorGeneral"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/model.ResponseErrorGeneral"
-                        }
-                    }
-                }
-            }
-        },
         "/photo": {
             "get": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Get all photo user",
@@ -295,7 +313,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Create photo user",
@@ -342,7 +360,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Get photo user",
@@ -389,7 +407,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Update photo user",
@@ -441,7 +459,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Delete photo user",
@@ -490,7 +508,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Get all social media user",
@@ -525,7 +543,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Create social media user",
@@ -572,7 +590,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Get social media user",
@@ -619,7 +637,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Update social media user",
@@ -671,7 +689,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "token": []
+                        "JWT": []
                     }
                 ],
                 "description": "Delete social media user",
@@ -786,7 +804,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/model.RequestUserRegister"
                         }
                     }
                 ],
@@ -876,8 +894,16 @@ const docTemplate = `{
                 },
                 "photo_id": {
                     "type": "integer"
-                },
-                "user_id": {
+                }
+            }
+        },
+        "model.RequestGetComment": {
+            "type": "object",
+            "required": [
+                "photo_id"
+            ],
+            "properties": {
+                "photo_id": {
                     "type": "integer"
                 }
             }
@@ -926,8 +952,32 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.RequestUserRegister": {
+            "type": "object",
+            "required": [
+                "age",
+                "email",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "age": {
+                    "type": "integer",
+                    "minimum": 8
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string",
                     "minLength": 6
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
@@ -976,48 +1026,13 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "model.User": {
-            "type": "object",
-            "required": [
-                "age",
-                "email",
-                "password",
-                "username"
-            ],
-            "properties": {
-                "age": {
-                    "type": "integer",
-                    "maximum": 130,
-                    "minimum": 8
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
         }
     },
     "securityDefinitions": {
-        "token": {
-            "description": "token for authentication",
+        "JWT": {
+            "description": "description: Enter the token with the ` + "`" + `Bearer: ` + "`" + ` prefix, e.g. \"Bearer abcde12345\".",
             "type": "apiKey",
-            "name": "Authentication",
+            "name": "Authorization",
             "in": "header"
         }
     }
