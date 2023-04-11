@@ -45,7 +45,6 @@ func NewUserHandler(userService services.UserService, validator_ validator.Valid
 // @Router /users/login [post]
 func (handler *userHandler) Login(c *gin.Context) {
 	contentType := helpers.GetContentType(c)
-	_ = contentType
 	User := model.RequestUserLogin{}
 
 	// binding email, password
@@ -181,7 +180,6 @@ func (handler *userHandler) Login(c *gin.Context) {
 // @Router /users/register [post]
 func (handler *userHandler) Register(c *gin.Context) {
 	contentType := helpers.GetContentType(c)
-	_ = contentType
 	User := model.RequestUserRegister{}
 
 	// bind username, email, password, age
@@ -201,11 +199,6 @@ func (handler *userHandler) Register(c *gin.Context) {
 				field := validationError.Field()
 				// validation error tag
 				switch validationError.Tag() {
-				case "unique":
-					switch field {
-					case "Username", "Email":
-						errorsMap[field] = fmt.Sprintf("%s is must be unique", field)
-					}
 				case "min":
 					switch field {
 					case "Password":
@@ -248,16 +241,29 @@ func (handler *userHandler) Register(c *gin.Context) {
 	}
 
 	if user, err := handler.userService.Register(c, User); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
-			Status:  "Email Already Exists/Password Invalid",
-			Message: "The email address you entered already exists/password invalid",
-		})
-		return
+		fmt.Println("coba liat ini",user)
+		if user.Username == "" && user.Email == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+				Status:  "Email and Username Already Exists",
+				Message: "Email address and username you entered already exists",
+			})
+			return
+		} else if user.Username == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+				Status:  "Username Already Exists",
+				Message: "Username you entered already exists",
+			})
+			return
+		} else if user.Email == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
+				Status:  "Email address Already Exists",
+				Message: "Email address you entered already exists",
+			})
+			return
+		}
 	} else {
 		c.JSON(http.StatusCreated, model.ResponseRegistered{
-			Id:       user.ID,
-			Email:    user.Email,
-			Username: user.Username,
+			Message: "User registered successfully",
 		})
 	}
 }

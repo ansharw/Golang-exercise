@@ -35,7 +35,17 @@ func (repo *userRepository) Login(ctx context.Context, tx *gorm.DB, email, pass 
 
 func (repo *userRepository) Register(ctx context.Context, tx *gorm.DB, user model.RequestUserRegister) (model.User, error) {
 	User := model.User{}
-	if err := tx.WithContext(ctx).Where("email = ?", user.Email).Take(&User).Error; err == nil {
+	if err := tx.WithContext(ctx).Where("username = ? and email = ?", user.Username, user.Email).Take(&User).Error; err == nil {
+		log.Println("Email and Username Already Exists")
+		User.Email = ""
+		User.Username = ""
+		return User, errors.New("error: Email and Username Already Exists")
+	} else if err := tx.WithContext(ctx).Where("username = ?", user.Username).Take(&User).Error; err == nil {
+		User.Username = ""
+		log.Println("Username Already Exists")
+		return User, errors.New("error: Username Already Exists")
+	} else if err := tx.WithContext(ctx).Where("email = ?", user.Email).Take(&User).Error; err == nil {
+		User.Email = ""
 		log.Println("Email Already Exists")
 		return User, errors.New("error: Email Already Exists")
 	}

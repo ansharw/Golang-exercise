@@ -2,21 +2,21 @@ package model
 
 type User struct {
 	GormModel
-	Username string `gorm:"not null,unique" json:"username" form:"username" binding:"required,unique"`
-	Email    string `gorm:"not null" json:"email" form:"email" binding:"required,email,unique"`
+	Username string `gorm:"not null,unique" json:"username" form:"username" binding:"required"`
+	Email    string `gorm:"not null,unique" json:"email" form:"email" binding:"required,email"`
 	Password string `gorm:"not null" json:"password" form:"password" binding:"required,min=6"`
 	Age      int    `gorm:"not null" json:"age" form:"age" binding:"required,gte=8"`
 }
 
 type RequestUserLogin struct {
-	Email    string `gorm:"-:all" json:"email" form:"email" binding:"required,email,unique"`
+	Email    string `gorm:"-:all" json:"email" form:"email" binding:"required,email"`
 	Password string `gorm:"-:all" json:"password" form:"password" binding:"required"`
 }
 
 type RequestUserRegister struct {
 	Age      int    `gorm:"-:all" json:"age" form:"age" binding:"required,gte=8"`
-	Username string `gorm:"-:all,unique" json:"username" form:"username" binding:"required,unique"`
-	Email    string `gorm:"-:all,unique" json:"email" form:"email" binding:"required,email,unique"`
+	Username string `gorm:"-:all,unique" json:"username" form:"username" binding:"required"`
+	Email    string `gorm:"-:all,unique" json:"email" form:"email" binding:"required,email"`
 	Password string `gorm:"-:all" json:"password" form:"password" binding:"required,min=6"`
 }
 
@@ -27,15 +27,13 @@ type ResponseErrorGeneral struct {
 }
 
 type ResponseRegistered struct {
-	Id  uint `json:"id"`
-	Email string `json:"email"`
-	Username string `json:"username"`
+	Message string `json:"message"`
 }
 
 type ResponseDeleted struct {
-	Message  string `json:"message"`
+	Message string `json:"message"`
 }
 
 type ResponseToken struct {
-	Token  string `json:"token"`
+	Token string `json:"token"`
 }
