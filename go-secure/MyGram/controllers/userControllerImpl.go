@@ -39,9 +39,8 @@ func NewUserHandler(userService services.UserService, validator_ validator.Valid
 // @Produce json
 // @Produce x-www-form-urlencoded
 // @Param requestLogin body model.RequestUserLogin true "login user"
-// @Success 201 {object} model.ResponseErrorGeneral
+// @Success 201 {object} model.ResponseToken
 // @Failure 400 {object} model.ResponseErrorGeneral
-// @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /users/login [post]
 func (handler *userHandler) Login(c *gin.Context) {
 	contentType := helpers.GetContentType(c)
@@ -175,7 +174,7 @@ func (handler *userHandler) Login(c *gin.Context) {
 // @Produce json
 // @Produce x-www-form-urlencoded
 // @Param requestRegister body model.RequestUserRegister true "Register user"
-// @Success 201 {object} model.ResponseErrorGeneral
+// @Success 201 {object} model.ResponseRegistered
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Router /users/register [post]
 func (handler *userHandler) Register(c *gin.Context) {
@@ -241,7 +240,6 @@ func (handler *userHandler) Register(c *gin.Context) {
 	}
 
 	if user, err := handler.userService.Register(c, User); err != nil {
-		fmt.Println("coba liat ini",user)
 		if user.Username == "" && user.Email == "" {
 			c.AbortWithStatusJSON(http.StatusBadRequest, model.ResponseErrorGeneral{
 				Status:  "Email and Username Already Exists",

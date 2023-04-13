@@ -19,7 +19,7 @@ func SocialMediaAuthorizations() gin.HandlerFunc {
 
 		result := db.Where("user_id = ?", userID).Order("id desc").Take(&socialMedia)
 		if result.RowsAffected == 0 {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   "Data Not Found",
 				"message": fmt.Sprintln("There is no data social media"),
 			})
@@ -43,11 +43,11 @@ func CommentAuthorizations() gin.HandlerFunc {
 		db := database.GetConnection()
 		userData := c.MustGet("userData").(jwt.MapClaims)
 		userID := uint(userData["id"].(float64))
-		comment := model.Comment{}
+		comment := model.Comments{}
 
 		result := db.Where("user_id = ?", userID).Order("id desc").Take(&comment)
 		if result.RowsAffected == 0 {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   "Data Not Found",
 				"message": fmt.Sprintln("There is no data comment"),
 			})
@@ -75,7 +75,7 @@ func PhotoAuthorizations() gin.HandlerFunc {
 
 		result := db.Where("user_id = ?", userID).Order("id desc").Take(&photo)
 		if result.RowsAffected == 0 {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   "Data Not Found",
 				"message": fmt.Sprintln("There is no data photo"),
 			})

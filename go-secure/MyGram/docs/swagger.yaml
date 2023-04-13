@@ -15,6 +15,7 @@ definitions:
         type: integer
     required:
     - message
+    - photo_id
     type: object
   model.Photo:
     properties:
@@ -115,6 +116,16 @@ definitions:
       message:
         type: string
     type: object
+  model.ResponseRegistered:
+    properties:
+      message:
+        type: string
+    type: object
+  model.ResponseToken:
+    properties:
+      token:
+        type: string
+    type: object
   model.SocialMedia:
     properties:
       created_at:
@@ -166,6 +177,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
         "500":
           description: Internal Server Error
           schema:
@@ -199,6 +214,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
       - JWT: []
       summary: Create comment photo user
@@ -224,6 +243,10 @@ paths:
             $ref: '#/definitions/model.ResponseDeleted'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
         "500":
@@ -260,6 +283,10 @@ paths:
             $ref: '#/definitions/model.Comment'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
         "404":
@@ -300,6 +327,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
       - JWT: []
       summary: Update comment by photo id user
@@ -319,6 +350,10 @@ paths:
             items:
               $ref: '#/definitions/model.Photo'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
         "500":
           description: Internal Server Error
           schema:
@@ -352,6 +387,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
       - JWT: []
       summary: Create photo user
@@ -377,6 +416,10 @@ paths:
             $ref: '#/definitions/model.ResponseDeleted'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
         "500":
@@ -407,6 +450,10 @@ paths:
             $ref: '#/definitions/model.Photo'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
         "404":
@@ -447,6 +494,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
       - JWT: []
       summary: Update photo user
@@ -466,6 +517,10 @@ paths:
             items:
               $ref: '#/definitions/model.SocialMedia'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
         "500":
           description: Internal Server Error
           schema:
@@ -499,6 +554,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
       - JWT: []
       summary: Create social media user
@@ -524,6 +583,10 @@ paths:
             $ref: '#/definitions/model.ResponseDeleted'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
         "500":
@@ -554,6 +617,10 @@ paths:
             $ref: '#/definitions/model.SocialMedia'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
         "404":
@@ -594,6 +661,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ResponseErrorGeneral'
       security:
       - JWT: []
       summary: Update social media user
@@ -619,13 +690,9 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.ResponseErrorGeneral'
+            $ref: '#/definitions/model.ResponseToken'
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ResponseErrorGeneral'
-        "401":
-          description: Unauthorized
           schema:
             $ref: '#/definitions/model.ResponseErrorGeneral'
       summary: Login user
@@ -651,7 +718,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.ResponseErrorGeneral'
+            $ref: '#/definitions/model.ResponseRegistered'
         "400":
           description: Bad Request
           schema:

@@ -3,6 +3,8 @@ package repository
 import (
 	"MyGram/model"
 	"context"
+	"errors"
+	"fmt"
 	"log"
 
 	"gorm.io/gorm"
@@ -49,20 +51,29 @@ func (repo *photoRepository) Create(ctx context.Context, tx *gorm.DB, req model.
 
 func (repo *photoRepository) Update(ctx context.Context, tx *gorm.DB, req model.RequestPhoto, id, userID uint) (model.Photo, error) {
 	photo := model.Photo{}
-	if err := tx.WithContext(ctx).Model(&photo).Where("id = ? AND user_id = ?", id, userID).Updates(model.Photo{GormModel: model.GormModel{ID: id}, Title: req.Title, Caption: req.Caption, PhotoURL: req.PhotoURL}).Error; err != nil {
-		log.Printf("Error updating photo: %+v data doesn't match\n", err)
-		return photo, err
+	if err := tx.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).First(&photo).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return photo, fmt.Errorf("photo with ID %d and user ID %d not found", id, userID)
+		}
+		return photo, fmt.Errorf("failed to update photo: %v", err)
 	}
-	// to return result after update
-	tx.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).Take(&photo)
+
+	if err := tx.WithContext(ctx).Model(&photo).Where("id = ? AND user_id = ?", id, userID).Updates(model.Photo{GormModel: model.GormModel{ID: id}, Title: req.Title, Caption: req.Caption, PhotoURL: req.PhotoURL}).Error; err != nil {
+		return photo, fmt.Errorf("failed to update photo: %v", err)
+	}
+
 	return photo, nil
 }
 
-func (repo *photoRepository) Delete(ctx context.Context, tx *gorm.DB, id, userID uint) (model.Photo, error) {
+func (repo *photoRepository) Delete(ctx context.Context, tx *gorm.DB, id, userID uint) error {
 	photo := model.Photo{}
-	if err := tx.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).Take(&photo).Error; err != nil {
-		log.Printf("Error deleting photo: %+v data doesn't match\n", err)
-		return photo, err
+	result := tx.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).Delete(&photo)
+	if result.Error != nil {
+		log.Printf("Error deleting social media: %+v\n", result.Error)
+		return result.Error
+	} else if result.RowsAffected == 0 {
+		log.Printf("Error deleting social media: data not found\n")
+		return gorm.ErrRecordNotFound
 	}
-	return photo, nil
+	return nil
 }

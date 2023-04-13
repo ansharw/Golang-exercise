@@ -37,6 +37,7 @@ func NewSocialMediaHandler(socialMediaService services.SocialMediaService, valid
 // @Security JWT
 // @securityDefinitions.apikey JWT
 // @Success 200 {array} model.SocialMedia
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /socialmedia [get]
 func (handler *socialMediaHandler) GetAllSocialMedia(c *gin.Context) {
@@ -68,6 +69,7 @@ func (handler *socialMediaHandler) GetAllSocialMedia(c *gin.Context) {
 // @Success 200 {object} model.SocialMedia
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Failure 404 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /socialmedia/{socialMediaId} [get]
 func (handler *socialMediaHandler) GetSocialMedia(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
@@ -109,6 +111,7 @@ func (handler *socialMediaHandler) GetSocialMedia(c *gin.Context) {
 // @Param requestCreate body model.RequestSocialMedia true "Create Social Media user"
 // @Success 201 {object} model.SocialMedia
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /socialmedia [post]
 func (handler *socialMediaHandler) CreateSocialMedia(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
@@ -247,6 +250,7 @@ func (handler *socialMediaHandler) CreateSocialMedia(c *gin.Context) {
 // @Param requestUpdate body model.RequestSocialMedia true "Update Social Media user"
 // @Success 200 {object} model.SocialMedia
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /socialmedia/{socialMediaId} [put]
 func (handler *socialMediaHandler) UpdateSocialMedia(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
@@ -390,6 +394,7 @@ func (handler *socialMediaHandler) UpdateSocialMedia(c *gin.Context) {
 // @Param socialMediaId path int true "Social Media ID"
 // @Success 200 {object} model.ResponseDeleted
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /socialmedia/{socialMediaId} [delete]
 func (handler *socialMediaHandler) DeleteSocialMedia(c *gin.Context) {
@@ -406,7 +411,7 @@ func (handler *socialMediaHandler) DeleteSocialMedia(c *gin.Context) {
 		return
 	}
 
-	if _, err := handler.socialMediaService.Delete(c, uint(socialMediaId), userID); err != nil {
+	if err := handler.socialMediaService.Delete(c, uint(socialMediaId), userID); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, model.ResponseErrorGeneral{
 			Status:  "Internal Server Error",
 			Message: "Failed to delete social media",

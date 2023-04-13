@@ -55,6 +55,12 @@
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -102,6 +108,12 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
@@ -154,6 +166,12 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
@@ -215,6 +233,12 @@
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
                     }
                 }
             },
@@ -257,6 +281,12 @@
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -292,6 +322,12 @@
                             "items": {
                                 "$ref": "#/definitions/model.Photo"
                             }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
                     },
                     "500": {
@@ -344,6 +380,12 @@
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
                     }
                 }
             }
@@ -384,6 +426,12 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
@@ -445,6 +493,12 @@
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
                     }
                 }
             },
@@ -487,6 +541,12 @@
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -522,6 +582,12 @@
                             "items": {
                                 "$ref": "#/definitions/model.SocialMedia"
                             }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
                     },
                     "500": {
@@ -574,6 +640,12 @@
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
                     }
                 }
             }
@@ -614,6 +686,12 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
@@ -675,6 +753,12 @@
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
                     }
                 }
             },
@@ -713,6 +797,12 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
@@ -756,17 +846,11 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                            "$ref": "#/definitions/model.ResponseToken"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.ResponseErrorGeneral"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/model.ResponseErrorGeneral"
                         }
@@ -804,7 +888,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.ResponseErrorGeneral"
+                            "$ref": "#/definitions/model.ResponseRegistered"
                         }
                     },
                     "400": {
@@ -821,7 +905,8 @@
         "model.Comment": {
             "type": "object",
             "required": [
-                "message"
+                "message",
+                "photo_id"
             ],
             "properties": {
                 "created_at": {
@@ -988,6 +1073,22 @@
                     "type": "string"
                 },
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ResponseRegistered": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ResponseToken": {
+            "type": "object",
+            "properties": {
+                "token": {
                     "type": "string"
                 }
             }

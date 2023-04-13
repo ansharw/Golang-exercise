@@ -1,10 +1,9 @@
 package database
 
 import (
+	"MyGram/model"
 	"fmt"
 	"log"
-
-	"MyGram/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,8 +15,6 @@ var (
 	user     = "postgres"
 	password = "postgres"
 	dbname   = "my_gram"
-	// db       *gorm.DB
-	// err      error
 )
 
 func GetConnection() *gorm.DB {
@@ -28,8 +25,8 @@ func GetConnection() *gorm.DB {
 		log.Fatal("Error to connection database", err)
 	}
 
-	fmt.Println("Successfully connected to database")
+	log.Println("Successfully connected to database")
 
-	db.Debug().AutoMigrate(model.User{}, model.Photo{}, model.Comment{}, model.SocialMedia{})
+	db.Debug().AutoMigrate(model.User{}, model.Photo{}, model.Comments{}, model.SocialMedia{})
 	return db
 }

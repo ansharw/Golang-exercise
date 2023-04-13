@@ -70,14 +70,14 @@ func (service *socialMediaService) Update(ctx context.Context, req model.Request
 	}
 }
 
-func (service *socialMediaService) Delete(ctx context.Context, id, userID uint) (model.SocialMedia, error) {
+func (service *socialMediaService) Delete(ctx context.Context, id, userID uint) (error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if socialMedia, err := service.repoSocialMedia.Delete(ctx, tx, id, userID); err != nil {
+	if err := service.repoSocialMedia.Delete(ctx, tx, id, userID); err != nil {
 		log.Println("Failed to delete socialMedia")
-		return socialMedia, err
+		return err
 	} else {
-		return socialMedia, nil
+		return nil
 	}
 }

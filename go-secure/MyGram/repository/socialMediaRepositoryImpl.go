@@ -3,6 +3,8 @@ package repository
 import (
 	"MyGram/model"
 	"context"
+	"errors"
+	"fmt"
 	"log"
 
 	"gorm.io/gorm"
@@ -47,20 +49,28 @@ func (repo *socialMediaRepository) Create(ctx context.Context, tx *gorm.DB, req 
 
 func (repo *socialMediaRepository) Update(ctx context.Context, tx *gorm.DB, req model.RequestSocialMedia, id, userID uint) (model.SocialMedia, error) {
 	socialMedia := model.SocialMedia{}
-	if err := tx.WithContext(ctx).Model(&socialMedia).Where("id = ? AND user_id = ?", id, userID).Updates(model.SocialMedia{GormModel: model.GormModel{ID: id}, Name: req.Name, SocialMediaURL: req.SocialMediaURL}).Error; err != nil {
-		log.Printf("Error updating social media: %+v data doesn't match\n", err)
-		return socialMedia, err
+	if err := tx.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).First(&socialMedia).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return socialMedia, fmt.Errorf("social media with ID %d and user ID %d not found", id, userID)
+		}
+		return socialMedia, fmt.Errorf("failed to update social media: %v", err)
 	}
-	// to return result after update
-	tx.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).Take(&socialMedia)
+
+	if err := tx.WithContext(ctx).Model(&socialMedia).Where("id = ? AND user_id = ?", id, userID).Updates(model.SocialMedia{GormModel: model.GormModel{ID: id}, Name: req.Name, SocialMediaURL: req.SocialMediaURL}).Error; err != nil {
+		return socialMedia, fmt.Errorf("failed to update social media: %v", err)
+	}
 	return socialMedia, nil
 }
 
-func (repo *socialMediaRepository) Delete(ctx context.Context, tx *gorm.DB, id, userID uint) (model.SocialMedia, error) {
+func (repo *socialMediaRepository) Delete(ctx context.Context, tx *gorm.DB, id, userID uint) error {
 	socialMedia := model.SocialMedia{}
-	if err := tx.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).Take(&socialMedia).Error; err != nil {
-		log.Printf("Error deleting social media: %+v data doesn't match\n", err)
-		return socialMedia, err
+	result := tx.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).Delete(&socialMedia)
+	if result.Error != nil {
+		log.Printf("Error deleting social media: %+v\n", result.Error)
+		return result.Error
+	} else if result.RowsAffected == 0 {
+		log.Printf("Error deleting social media: data not found\n")
+		return gorm.ErrRecordNotFound
 	}
-	return socialMedia, nil
+	return nil
 }
