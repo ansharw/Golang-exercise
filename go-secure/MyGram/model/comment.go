@@ -1,6 +1,6 @@
 package model
 
-type Comment struct {
+type Comments struct {
 	GormModel
 	Message string `gorm:"not null" json:"message" form:"message" binding:"required"`
 	UserID  uint   `gorm:"not null" json:"user_id" form:"user_id"`
@@ -8,15 +8,15 @@ type Comment struct {
 }
 
 // create, update
-type RequestComment struct {
+type RequestComments struct {
 	Message string `gorm:"-:all" json:"message" form:"message" binding:"required"`
 	PhotoID uint   `gorm:"-:all" json:"photo_id" form:"photo_id" binding:"required"`
 }
 
-type RequestGetComment struct {
+type RequestGetComments struct {
 	PhotoID uint   `gorm:"-:all" json:"photo_id" form:"photo_id" binding:"required"`
 }
 
-type RequestDeleteComment struct {
+type RequestDeleteComments struct {
 	PhotoID uint   `gorm:"-:all" json:"photo_id" form:"photo_id" binding:"required"`
 }

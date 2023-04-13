@@ -70,14 +70,14 @@ func (service *photoService) Update(ctx context.Context, req model.RequestPhoto,
 	}
 }
 
-func (service *photoService) Delete(ctx context.Context, id, userID uint) (model.Photo, error) {
+func (service *photoService) Delete(ctx context.Context, id, userID uint) error {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if photo, err := service.repoPhoto.Delete(ctx, tx, id, userID); err != nil {
+	if err := service.repoPhoto.Delete(ctx, tx, id, userID); err != nil {
 		log.Println("Failed to delete photo")
-		return photo, err
+		return err
 	} else {
-		return photo, nil
+		return nil
 	}
 }

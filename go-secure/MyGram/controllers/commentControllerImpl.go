@@ -39,20 +39,21 @@ func NewCommentHandler(commentService services.CommentService, validator validat
 // @Param requestGet body model.RequestGetComment true "Get All Comment By photo id"
 // @Success 200 {array} model.Comment
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /comment [get]
 func (handler *commentHandler) GetAllComment(c *gin.Context) {
 	// userData := c.MustGet("userData").(jwt.MapClaims)
 	// userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.RequestGetComment{}
+	comments := model.RequestGetComments{}
 
 	// bind photo_id
 	var err error
 	if contentType == appJson {
-		err = c.ShouldBindJSON(&comment)
+		err = c.ShouldBindJSON(&comments)
 	} else {
-		err = c.ShouldBind(&comment)
+		err = c.ShouldBind(&comments)
 	}
 
 	// ----------------------- validation version 1
@@ -124,7 +125,7 @@ func (handler *commentHandler) GetAllComment(c *gin.Context) {
 		return
 	}
 
-	res, err := handler.commentService.FindAllByPhotoId(c, comment.PhotoID)
+	res, err := handler.commentService.FindAllByPhotoId(c, comments.PhotoID)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, model.ResponseErrorGeneral{
 			Status:  "Internal Server Error",
@@ -150,13 +151,14 @@ func (handler *commentHandler) GetAllComment(c *gin.Context) {
 // @Param requestGet body model.RequestGetComment true "Get Comment By photo id and comment id in path params"
 // @Success 200 {object} model.Comment
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 404 {object} model.ResponseErrorGeneral
 // @Router /comment/{commentId} [get]
 func (handler *commentHandler) GetComment(c *gin.Context) {
 	// userData := c.MustGet("userData").(jwt.MapClaims)
 	// userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.RequestGetComment{}
+	comment := model.RequestGetComments{}
 
 	// Get param commentId
 	commentId, err := strconv.Atoi(c.Param("commentId"))
@@ -270,12 +272,13 @@ func (handler *commentHandler) GetComment(c *gin.Context) {
 // @Param requestCreate body model.RequestComment true "Create Comment photo"
 // @Success 201 {object} model.Comment
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /comment [post]
 func (handler *commentHandler) CreateComment(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.RequestComment{}
+	comment := model.RequestComments{}
 
 	// bind message, photo_id
 	var err error
@@ -393,12 +396,13 @@ func (handler *commentHandler) CreateComment(c *gin.Context) {
 // @Param requestUpdate body model.RequestComment true "Update Comment by photo id user"
 // @Success 200 {object} model.Comment
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /comment/{commentId} [put]
 func (handler *commentHandler) UpdateComment(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.RequestComment{}
+	comment := model.RequestComments{}
 
 	// Get param commentId
 	commentId, err := strconv.Atoi(c.Param("commentId"))
@@ -522,13 +526,14 @@ func (handler *commentHandler) UpdateComment(c *gin.Context) {
 // @Param commentId path int true "Comment ID"
 // @Success 200 {object} model.ResponseDeleted
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /comment/{commentId} [delete]
 func (handler *commentHandler) DeleteComment(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	contentType := helpers.GetContentType(c)
-	comment := model.RequestDeleteComment{}
+	comment := model.RequestDeleteComments{}
 
 	// Get param commentId
 	commentId, err := strconv.Atoi(c.Param("commentId"))
@@ -616,7 +621,7 @@ func (handler *commentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	if _, err := handler.commentService.Delete(c, uint(commentId), userID, comment.PhotoID); err != nil {
+	if err := handler.commentService.Delete(c, uint(commentId), userID, comment.PhotoID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ResponseErrorGeneral{
 			Status:  "Internal Server Error",
 			Message: "Failed to delete comment",

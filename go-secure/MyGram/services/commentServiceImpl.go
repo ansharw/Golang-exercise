@@ -22,7 +22,7 @@ func NewCommentService(db *gorm.DB, repoComment repository.CommentRepository) *c
 	}
 }
 
-func (service *commentService) FindAllByPhotoId(ctx context.Context, photoID uint) ([]model.Comment, error) {
+func (service *commentService) FindAllByPhotoId(ctx context.Context, photoID uint) ([]model.Comments, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
@@ -34,7 +34,7 @@ func (service *commentService) FindAllByPhotoId(ctx context.Context, photoID uin
 	}
 }
 
-func (service *commentService) FindByPhotoId(ctx context.Context, photoID uint, id uint) (model.Comment, error) {
+func (service *commentService) FindByPhotoId(ctx context.Context, photoID uint, id uint) (model.Comments, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
@@ -46,7 +46,7 @@ func (service *commentService) FindByPhotoId(ctx context.Context, photoID uint, 
 	}
 }
 
-func (service *commentService) Create(ctx context.Context, req model.RequestComment, userID, photoID uint) (model.Comment, error) {
+func (service *commentService) Create(ctx context.Context, req model.RequestComments, userID, photoID uint) (model.Comments, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
@@ -58,7 +58,7 @@ func (service *commentService) Create(ctx context.Context, req model.RequestComm
 	}
 }
 
-func (service *commentService) Update(ctx context.Context, req model.RequestComment, id, userID, photoID uint) (model.Comment, error) {
+func (service *commentService) Update(ctx context.Context, req model.RequestComments, id, userID, photoID uint) (model.Comments, error) {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
@@ -70,14 +70,14 @@ func (service *commentService) Update(ctx context.Context, req model.RequestComm
 	}
 }
 
-func (service *commentService) Delete(ctx context.Context, id, userID, photoID uint) (model.Comment, error) {
+func (service *commentService) Delete(ctx context.Context, id, userID, photoID uint) error {
 	tx := service.db.Begin()
 	defer helpers.CommitOrRollback(tx)
 
-	if photo, err := service.repoComment.Delete(ctx, tx, id, userID, photoID); err != nil {
+	if err := service.repoComment.Delete(ctx, tx, id, userID, photoID); err != nil {
 		log.Println("Failed to delete photo")
-		return photo, err
+		return err
 	} else {
-		return photo, nil
+		return nil
 	}
 }

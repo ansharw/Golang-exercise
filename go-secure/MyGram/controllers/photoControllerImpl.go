@@ -37,6 +37,7 @@ func NewPhotoHandler(photoService services.PhotoService, validator_ validator.Va
 // @Security JWT
 // @securityDefinitions.apikey JWT
 // @Success 200 {array} model.Photo
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /photo [get]
 func (handler *photoHandler) GetAllPhoto(c *gin.Context) {
@@ -45,7 +46,7 @@ func (handler *photoHandler) GetAllPhoto(c *gin.Context) {
 
 	res, err := handler.photoService.FindAllByUserId(c, userID)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, model.ResponseErrorGeneral{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, model.ResponseErrorGeneral{
 			Status:  "Internal Server Error",
 			Message: fmt.Sprintf("Error retrieving all photo user: %s", err.Error()),
 		})
@@ -67,6 +68,7 @@ func (handler *photoHandler) GetAllPhoto(c *gin.Context) {
 // @Param photoId path int true "Photo ID"
 // @Success 200 {object} model.Photo
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 404 {object} model.ResponseErrorGeneral
 // @Router /photo/{photoId} [get]
 func (handler *photoHandler) GetPhoto(c *gin.Context) {
@@ -110,6 +112,7 @@ func (handler *photoHandler) GetPhoto(c *gin.Context) {
 // @Param requestCreate body model.RequestPhoto true "Create Photo user"
 // @Success 201 {object} model.Photo
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /photo [post]
 func (handler *photoHandler) CreatePhoto(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
@@ -247,6 +250,7 @@ func (handler *photoHandler) CreatePhoto(c *gin.Context) {
 // @Param requestUpdate body model.RequestPhoto true "Update Photo user"
 // @Success 200 {object} model.Photo
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /photo/{photoId} [put]
 func (handler *photoHandler) UpdatePhoto(c *gin.Context) {
 	userData := c.MustGet("userData").(jwt.MapClaims)
@@ -390,6 +394,7 @@ func (handler *photoHandler) UpdatePhoto(c *gin.Context) {
 // @Param photoId path int true "Photo ID"
 // @Success 200 {object} model.ResponseDeleted
 // @Failure 400 {object} model.ResponseErrorGeneral
+// @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /photo/{photoId} [delete]
 func (handler *photoHandler) DeletePhoto(c *gin.Context) {
@@ -406,7 +411,7 @@ func (handler *photoHandler) DeletePhoto(c *gin.Context) {
 		return
 	}
 
-	if _, err := handler.photoService.Delete(c, uint(photoId), userID); err != nil {
+	if err := handler.photoService.Delete(c, uint(photoId), userID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ResponseErrorGeneral{
 			Status:  "Internal Server Error",
 			Message: "Failed to delete photo",
