@@ -27,10 +27,12 @@ const docTemplate = `{
                 ],
                 "description": "Get all comment by photo id user",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "tags": [
                     "Comment"
@@ -43,7 +45,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RequestGetComment"
+                            "$ref": "#/definitions/model.RequestGetComments"
                         }
                     }
                 ],
@@ -53,7 +55,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Comment"
+                                "$ref": "#/definitions/model.Comments"
                             }
                         }
                     },
@@ -103,7 +105,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RequestComment"
+                            "$ref": "#/definitions/model.RequestComments"
                         }
                     }
                 ],
@@ -111,7 +113,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.Comment"
+                            "$ref": "#/definitions/model.Comments"
                         }
                     },
                     "400": {
@@ -138,10 +140,12 @@ const docTemplate = `{
                 ],
                 "description": "Get comment by photo id user",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "tags": [
                     "Comment"
@@ -161,7 +165,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RequestGetComment"
+                            "$ref": "#/definitions/model.RequestGetComments"
                         }
                     }
                 ],
@@ -169,7 +173,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Comment"
+                            "$ref": "#/definitions/model.Comments"
                         }
                     },
                     "400": {
@@ -225,7 +229,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RequestComment"
+                            "$ref": "#/definitions/model.RequestComments"
                         }
                     }
                 ],
@@ -233,7 +237,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Comment"
+                            "$ref": "#/definitions/model.Comments"
                         }
                     },
                     "400": {
@@ -910,11 +914,10 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.Comment": {
+        "model.Comments": {
             "type": "object",
             "required": [
-                "message",
-                "photo_id"
+                "message"
             ],
             "properties": {
                 "created_at": {
@@ -967,7 +970,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.RequestComment": {
+        "model.RequestComments": {
             "type": "object",
             "required": [
                 "message",
@@ -982,7 +985,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.RequestGetComment": {
+        "model.RequestGetComments": {
             "type": "object",
             "required": [
                 "photo_id"

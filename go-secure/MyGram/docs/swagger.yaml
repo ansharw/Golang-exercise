@@ -1,5 +1,5 @@
 definitions:
-  model.Comment:
+  model.Comments:
     properties:
       created_at:
         type: string
@@ -15,7 +15,6 @@ definitions:
         type: integer
     required:
     - message
-    - photo_id
     type: object
   model.Photo:
     properties:
@@ -37,7 +36,7 @@ definitions:
     - photo_url
     - title
     type: object
-  model.RequestComment:
+  model.RequestComments:
     properties:
       message:
         type: string
@@ -47,7 +46,7 @@ definitions:
     - message
     - photo_id
     type: object
-  model.RequestGetComment:
+  model.RequestGetComments:
     properties:
       photo_id:
         type: integer
@@ -156,6 +155,7 @@ paths:
     get:
       consumes:
       - application/json
+      - application/x-www-form-urlencoded
       description: Get all comment by photo id user
       parameters:
       - description: Get All Comment By photo id
@@ -163,15 +163,16 @@ paths:
         name: requestGet
         required: true
         schema:
-          $ref: '#/definitions/model.RequestGetComment'
+          $ref: '#/definitions/model.RequestGetComments'
       produces:
       - application/json
+      - application/x-www-form-urlencoded
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Comment'
+              $ref: '#/definitions/model.Comments'
             type: array
         "400":
           description: Bad Request
@@ -201,7 +202,7 @@ paths:
         name: requestCreate
         required: true
         schema:
-          $ref: '#/definitions/model.RequestComment'
+          $ref: '#/definitions/model.RequestComments'
       produces:
       - application/json
       - application/x-www-form-urlencoded
@@ -209,7 +210,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.Comment'
+            $ref: '#/definitions/model.Comments'
         "400":
           description: Bad Request
           schema:
@@ -261,6 +262,7 @@ paths:
     get:
       consumes:
       - application/json
+      - application/x-www-form-urlencoded
       description: Get comment by photo id user
       parameters:
       - description: Comment ID
@@ -273,14 +275,15 @@ paths:
         name: requestGet
         required: true
         schema:
-          $ref: '#/definitions/model.RequestGetComment'
+          $ref: '#/definitions/model.RequestGetComments'
       produces:
       - application/json
+      - application/x-www-form-urlencoded
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Comment'
+            $ref: '#/definitions/model.Comments'
         "400":
           description: Bad Request
           schema:
@@ -314,7 +317,7 @@ paths:
         name: requestUpdate
         required: true
         schema:
-          $ref: '#/definitions/model.RequestComment'
+          $ref: '#/definitions/model.RequestComments'
       produces:
       - application/json
       - application/x-www-form-urlencoded
@@ -322,7 +325,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Comment'
+            $ref: '#/definitions/model.Comments'
         "400":
           description: Bad Request
           schema:
