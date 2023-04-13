@@ -13,5 +13,3 @@ func main() {
 	route := routers.Route(db)
 	route.Run(":8080")
 }
-
-// update dan delete belum berhasil di open api
