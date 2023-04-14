@@ -33,11 +33,13 @@ func NewCommentHandler(commentService services.CommentService, validator validat
 // @Description Get all comment by photo id user
 // @Tags Comment
 // @Accept json
+// @Accept x-www-form-urlencoded
 // @Produce json
+// @Produce x-www-form-urlencoded
 // @Security JWT
 // @securityDefinitions.apikey JWT
-// @Param requestGet body model.RequestGetComment true "Get All Comment By photo id"
-// @Success 200 {array} model.Comment
+// @Param requestGet body model.RequestGetComments true "Get All Comment By photo id"
+// @Success 200 {array} model.Comments
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
@@ -144,12 +146,14 @@ func (handler *commentHandler) GetAllComment(c *gin.Context) {
 // @Description Get comment by photo id user
 // @Tags Comment
 // @Accept json
+// @Accept x-www-form-urlencoded
 // @Produce json
+// @Produce x-www-form-urlencoded
 // @Security JWT
 // @securityDefinitions.apikey JWT
 // @Param commentId path int true "Comment ID"
-// @Param requestGet body model.RequestGetComment true "Get Comment By photo id and comment id in path params"
-// @Success 200 {object} model.Comment
+// @Param requestGet body model.RequestGetComments true "Get Comment By photo id and comment id in path params"
+// @Success 200 {object} model.Comments
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Failure 401 {object} model.ResponseErrorGeneral
 // @Failure 404 {object} model.ResponseErrorGeneral
@@ -269,8 +273,8 @@ func (handler *commentHandler) GetComment(c *gin.Context) {
 // @Produce x-www-form-urlencoded
 // @Security JWT
 // @securityDefinitions.apikey JWT
-// @Param requestCreate body model.RequestComment true "Create Comment photo"
-// @Success 201 {object} model.Comment
+// @Param requestCreate body model.RequestComments true "Create Comment photo"
+// @Success 201 {object} model.Comments
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /comment [post]
@@ -393,8 +397,8 @@ func (handler *commentHandler) CreateComment(c *gin.Context) {
 // @Security JWT
 // @securityDefinitions.apikey JWT
 // @Param commentId path int true "Comment ID"
-// @Param requestUpdate body model.RequestComment true "Update Comment by photo id user"
-// @Success 200 {object} model.Comment
+// @Param requestUpdate body model.RequestComments true "Update Comment by photo id user"
+// @Success 200 {object} model.Comments
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Failure 401 {object} model.ResponseErrorGeneral
 // @Router /comment/{commentId} [put]

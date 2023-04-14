@@ -19,10 +19,12 @@
                 ],
                 "description": "Get all comment by photo id user",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "tags": [
                     "Comment"
@@ -35,7 +37,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RequestGetComment"
+                            "$ref": "#/definitions/model.RequestGetComments"
                         }
                     }
                 ],
@@ -45,7 +47,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Comment"
+                                "$ref": "#/definitions/model.Comments"
                             }
                         }
                     },
@@ -95,7 +97,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RequestComment"
+                            "$ref": "#/definitions/model.RequestComments"
                         }
                     }
                 ],
@@ -103,7 +105,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.Comment"
+                            "$ref": "#/definitions/model.Comments"
                         }
                     },
                     "400": {
@@ -130,10 +132,12 @@
                 ],
                 "description": "Get comment by photo id user",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "tags": [
                     "Comment"
@@ -153,7 +157,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RequestGetComment"
+                            "$ref": "#/definitions/model.RequestGetComments"
                         }
                     }
                 ],
@@ -161,7 +165,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Comment"
+                            "$ref": "#/definitions/model.Comments"
                         }
                     },
                     "400": {
@@ -217,7 +221,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RequestComment"
+                            "$ref": "#/definitions/model.RequestComments"
                         }
                     }
                 ],
@@ -225,7 +229,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Comment"
+                            "$ref": "#/definitions/model.Comments"
                         }
                     },
                     "400": {
@@ -902,11 +906,10 @@
         }
     },
     "definitions": {
-        "model.Comment": {
+        "model.Comments": {
             "type": "object",
             "required": [
-                "message",
-                "photo_id"
+                "message"
             ],
             "properties": {
                 "created_at": {
@@ -959,7 +962,7 @@
                 }
             }
         },
-        "model.RequestComment": {
+        "model.RequestComments": {
             "type": "object",
             "required": [
                 "message",
@@ -974,7 +977,7 @@
                 }
             }
         },
-        "model.RequestGetComment": {
+        "model.RequestGetComments": {
             "type": "object",
             "required": [
                 "photo_id"
