@@ -38,6 +38,7 @@ func NewSocialMediaHandler(socialMediaService services.SocialMediaService, valid
 // @securityDefinitions.apikey JWT
 // @Success 200 {array} model.SocialMedia
 // @Failure 401 {object} model.ResponseErrorGeneral
+// @Failure 404 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /socialmedia [get]
 func (handler *socialMediaHandler) GetAllSocialMedia(c *gin.Context) {

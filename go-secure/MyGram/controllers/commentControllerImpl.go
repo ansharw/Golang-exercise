@@ -42,6 +42,7 @@ func NewCommentHandler(commentService services.CommentService, validator validat
 // @Success 200 {array} model.Comments
 // @Failure 400 {object} model.ResponseErrorGeneral
 // @Failure 401 {object} model.ResponseErrorGeneral
+// @Failure 404 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /comment [get]
 func (handler *commentHandler) GetAllComment(c *gin.Context) {

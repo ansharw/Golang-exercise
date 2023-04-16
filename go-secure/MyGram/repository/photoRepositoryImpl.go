@@ -19,9 +19,10 @@ func NewPhotoRepository() *photoRepository {
 
 func (repo *photoRepository) FindAllByUserId(ctx context.Context, tx *gorm.DB, userID uint) ([]model.Photo, error) {
 	photos := []model.Photo{}
-	if err := tx.WithContext(ctx).Where("user_id = ?", userID).Order("id DESC").Find(&photos).Error; err != nil {
-		log.Println("Error finding all photo:", err)
-		return photos, err
+	tx.WithContext(ctx).Where("user_id = ?", userID).Order("id DESC").Find(&photos)
+	if len(photos) == 0 {
+		log.Println("Error finding all photo")
+		return photos, errors.New("no records found")
 	}
 	return photos, nil
 }
