@@ -19,9 +19,10 @@ func NewSocialMediaRepository() *socialMediaRepository {
 
 func (repo *socialMediaRepository) FindAllByUserId(ctx context.Context, tx *gorm.DB, userID uint) ([]model.SocialMedia, error) {
 	socialMedias := []model.SocialMedia{}
-	if err := tx.WithContext(ctx).Where("user_id = ?", userID).Order("id DESC").Find(&socialMedias).Error; err != nil {
-		log.Println("Error finding all social media:", err)
-		return socialMedias, err
+	tx.WithContext(ctx).Where("user_id = ?", userID).Order("id DESC").Find(&socialMedias)
+	if len(socialMedias) == 0 {
+		log.Println("Error finding all social media")
+		return socialMedias, errors.New("no records found")
 	}
 	return socialMedias, nil
 }

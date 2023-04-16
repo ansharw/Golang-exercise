@@ -38,6 +38,7 @@ func NewPhotoHandler(photoService services.PhotoService, validator_ validator.Va
 // @securityDefinitions.apikey JWT
 // @Success 200 {array} model.Photo
 // @Failure 401 {object} model.ResponseErrorGeneral
+// @Failure 404 {object} model.ResponseErrorGeneral
 // @Failure 500 {object} model.ResponseErrorGeneral
 // @Router /photo [get]
 func (handler *photoHandler) GetAllPhoto(c *gin.Context) {

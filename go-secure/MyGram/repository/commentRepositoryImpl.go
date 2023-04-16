@@ -19,9 +19,10 @@ func NewCommentRepository() *commentRepository {
 
 func (repo *commentRepository) FindAllByPhotoId(ctx context.Context, tx *gorm.DB, photoID uint) ([]model.Comments, error) {
 	comments := []model.Comments{}
-	if err := tx.WithContext(ctx).Where("photo_id = ?", photoID).Order("id DESC").Find(&comments).Error; err != nil {
-		log.Println("Error finding all comment by photo:", err)
-		return comments, err
+	tx.WithContext(ctx).Where("photo_id = ?", photoID).Order("id DESC").Find(&comments)
+	if len(comments) == 0 {
+		log.Println("Error finding all comment by photo")
+		return comments, errors.New("no records found")
 	}
 	return comments, nil
 }

@@ -4,6 +4,7 @@ import (
 	"MyGram/controllers"
 	"MyGram/database"
 	"MyGram/middlewares"
+	"MyGram/model"
 	"MyGram/repository"
 	"MyGram/services"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 
 	_ "MyGram/docs"
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -55,30 +57,30 @@ func StartApp() *gin.Engine {
 	{
 		socialMediaRouter.Use(middlewares.Authentication())
 		socialMediaRouter.POST("/", handlerSocialMedia.CreateSocialMedia)
-		socialMediaRouter.GET("/", middlewares.SocialMediaAuthorizations(), handlerSocialMedia.GetAllSocialMedia)
-		socialMediaRouter.GET("/:socialMediaId", middlewares.SocialMediaAuthorizations(), handlerSocialMedia.GetSocialMedia)
-		socialMediaRouter.PUT("/:socialMediaId", middlewares.SocialMediaAuthorizations(), handlerSocialMedia.UpdateSocialMedia)
-		socialMediaRouter.DELETE("/:socialMediaId", middlewares.SocialMediaAuthorizations(), handlerSocialMedia.DeleteSocialMedia)
+		socialMediaRouter.GET("/", handlerSocialMedia.GetAllSocialMedia)
+		socialMediaRouter.GET("/:socialMediaId", middlewares.SocialMediaAuthorizations(&model.SocialMedia{}), handlerSocialMedia.GetSocialMedia)
+		socialMediaRouter.PUT("/:socialMediaId", middlewares.SocialMediaAuthorizations(&model.SocialMedia{}), handlerSocialMedia.UpdateSocialMedia)
+		socialMediaRouter.DELETE("/:socialMediaId", middlewares.SocialMediaAuthorizations(&model.SocialMedia{}), handlerSocialMedia.DeleteSocialMedia)
 	}
 
 	photoRouter := r.Group("/photo")
 	{
 		photoRouter.Use(middlewares.Authentication())
 		photoRouter.POST("/", handlerPhoto.CreatePhoto)
-		photoRouter.GET("/", middlewares.PhotoAuthorizations(), handlerPhoto.GetAllPhoto)
-		photoRouter.GET("/:photoId", middlewares.PhotoAuthorizations(), handlerPhoto.GetPhoto)
-		photoRouter.PUT("/:photoId", middlewares.PhotoAuthorizations(), handlerPhoto.UpdatePhoto)
-		photoRouter.DELETE("/:photoId", middlewares.PhotoAuthorizations(), handlerPhoto.DeletePhoto)
+		photoRouter.GET("/", handlerPhoto.GetAllPhoto)
+		photoRouter.GET("/:photoId", middlewares.PhotoAuthorizations(&model.Photo{}), handlerPhoto.GetPhoto)
+		photoRouter.PUT("/:photoId", middlewares.PhotoAuthorizations(&model.Photo{}), handlerPhoto.UpdatePhoto)
+		photoRouter.DELETE("/:photoId", middlewares.PhotoAuthorizations(&model.Photo{}), handlerPhoto.DeletePhoto)
 	}
 
 	commentRouter := r.Group("/comment")
 	{
 		commentRouter.Use(middlewares.Authentication())
 		commentRouter.POST("/", handlerComment.CreateComment)
-		commentRouter.GET("/", middlewares.CommentAuthorizations(), handlerComment.GetAllComment)
-		commentRouter.GET("/:commentId", middlewares.CommentAuthorizations(), handlerComment.GetComment)
-		commentRouter.PUT("/:commentId", middlewares.CommentAuthorizations(), handlerComment.UpdateComment)
-		commentRouter.DELETE("/:commentId", middlewares.CommentAuthorizations(), handlerComment.DeleteComment)
+		commentRouter.GET("/", handlerComment.GetAllComment)
+		commentRouter.GET("/:commentId", middlewares.CommentAuthorizations(&model.Comments{}), handlerComment.GetComment)
+		commentRouter.PUT("/:commentId", middlewares.CommentAuthorizations(&model.Comments{}), handlerComment.UpdateComment)
+		commentRouter.DELETE("/:commentId", middlewares.CommentAuthorizations(&model.Comments{}), handlerComment.DeleteComment)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
