@@ -6,7 +6,6 @@ import (
 	"MyGram/services"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -129,16 +128,16 @@ func (handler *userHandler) Login(c *gin.Context) {
 				}
 			}
 			// Join error messages into a single string
-			var errorMessages []string
-			for _, errorMessage := range errorsMap {
-				errorMessages = append(errorMessages, errorMessage)
-			}
-			errorMessageString := strings.Join(errorMessages, ", ")
+			// var errorMessages []string
+			// for _, errorMessage := range errorsMap {
+			// 	errorMessages = append(errorMessages, errorMessage)
+			// }
+			// errorMessageString := strings.Join(errorMessages, ", ")
 
 			// Return errors map as JSON response
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 				"error":   "Bad Request json/form",
-				"message": errorMessageString,
+				"message": errorsMap,
 			})
 			return
 		}
@@ -218,16 +217,16 @@ func (handler *userHandler) Register(c *gin.Context) {
 				}
 			}
 			// Join error messages into a single string
-			var errorMessages []string
-			for _, errorMessage := range errorsMap {
-				errorMessages = append(errorMessages, errorMessage)
-			}
-			errorMessageString := strings.Join(errorMessages, ", ")
+			// var errorMessages []string
+			// for _, errorMessage := range errorsMap {
+			// 	errorMessages = append(errorMessages, errorMessage)
+			// }
+			// errorMessageString := strings.Join(errorMessages, ", ")
 
 			// Return errors map as JSON response
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 				"error":   "Bad Request json/form",
-				"message": errorMessageString,
+				"message": errorsMap,
 			})
 			return
 		}
